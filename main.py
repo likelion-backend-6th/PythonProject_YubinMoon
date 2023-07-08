@@ -105,7 +105,7 @@ class MainPage(BasePage):
             "메뉴2",
             "메뉴3",
         ]
-        self.selected = 0
+        self.selected = None
         self.detail = """
         WELCOME
         this page is main
@@ -121,35 +121,54 @@ class MainPage(BasePage):
 
     def run(self, key: str) -> str | None:
         if key == "k":
-            if 0 < self.selected:
+            if self.selected is None:
+                self.selected = 0
+            elif 0 < self.selected:
                 self.selected -= 1
+            else:
+                self.selected = len(self.menu_list) - 1
         elif key == "j":
-            if self.selected < len(self.menu_list) - 1:
+            if self.selected is None:
+                self.selected = 0
+            elif self.selected < len(self.menu_list) - 1:
                 self.selected += 1
+            else:
+                self.selected = 0
         elif key == "h":
             return "help"
+        elif key == "q":
+            return "exit"
         elif key == "enter":
             return self.menu_list[self.selected]
+        elif key == "esc":
+            self.selected = -1
 
 
 class Controller:
     def __init__(self):
         self.page = self.get_page("main")
         self.printer = Printer()
+        self.render_data = RenderData()
         self.page_stack = ["main"]
 
     def run(self):
         while True:
-            self.printer.print(self.page.get_render_data())
+            self.print_display()
             key = self.get_key_input()
             result = self.page.run(key)
             if result:
-                self.page_stack.append(result)
                 self.page = self.get_page(result)
+
+    def print_display(self):
+        render_data = self.page.get_render_data()
+        self.render_data.update(render_data)
+        self.printer.print(self.render_data)
 
     def get_page(self, page_name: str):
         if page_name == "main":
             return MainPage()
+        if page_name == "exit":
+            self.exit()
         raise ValueError(f"page_name: {page_name} is not exist")
 
     def get_key_input(self) -> str:
