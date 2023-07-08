@@ -14,7 +14,8 @@ def test_print(mocker):
     render_data = RenderData(
         menu_list=["abc", "ccc", "bdc"], select_data=3, detail_data="testDetail"
     )
-    result = printer.render(render_data)
+    printer.data = render_data
+    result = printer.render()
     assert "abc" in result
     assert "ccc" in result
     assert "bdc" in result
@@ -35,7 +36,8 @@ def test_print_no_select(mocker):
     mocker.patch("os.get_terminal_size", return_value=TestClass)
     printer = Printer()
     render_data = RenderData(menu_list=["abc", "ccc", "bdc"], detail_data="testDetail")
-    result = printer.render(render_data)
+    printer.data = render_data
+    result = printer.render()
     assert "abc" in result
     assert "ccc" in result
     assert "bdc" in result
@@ -58,7 +60,8 @@ def test_print_no_select(mocker):
     render_data = RenderData(
         menu_list=["abc", "ccc", "bdc"], detail_data="testDetail\ntesttest"
     )
-    result = printer.render(render_data)
+    printer.data = render_data
+    result = printer.render()
     assert "abc" in result
     assert "ccc" in result
     assert "bdc" in result
