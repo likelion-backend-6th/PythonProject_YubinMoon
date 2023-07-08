@@ -1,4 +1,5 @@
 from __future__ import annotations
+import keyboard
 import os
 
 
@@ -33,6 +34,7 @@ class Printer:
 
     def print(self, data: RenderData) -> None:
         print_data = self.render(data)
+        os.system("cls")
         print(print_data, end="")
 
     def render(self, data: RenderData) -> str:
@@ -56,11 +58,12 @@ class Printer:
         return max([len(x) for x in data.menu_list]) + 4
 
     def make_str_list(self, data: RenderData, width: int) -> list[str]:
-        text_data = data.detail_data
+        text_data_list = data.detail_data.split("\n")
         text_list = []
-        while text_data:
-            text_list.append(text_data[:width])
-            text_data = text_data[width:]
+        for text_data in text_data_list:
+            while text_data:
+                text_list.append(text_data[:width])
+                text_data = text_data[width:]
         return text_list
 
 
@@ -101,5 +104,23 @@ class MainPage(BasePage):
         return input
 
 
+class Controller:
+    def __init__(self):
+        self.page = self.get_page("main")
+        self.printer = Printer()
+        self.page_stack = ["main"]
+
+    def run(self):
+        while True:
+            self.printer.print(self.page.get_render_data())
+            key = keyboard.read_key()
+            result = self.page.run(key)
+
+    def get_page(self, page_name: str):
+        if page_name == "main":
+            return MainPage()
+        raise ValueError(f"page_name: {page_name} is not exist")
+
+
 if __name__ == "__main__":
-    input()
+    Controller().run()
