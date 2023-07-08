@@ -64,10 +64,42 @@ class Printer:
         return text_list
 
 
+class BasePage:
+    def __init__(self):
+        pass
+
+    def get_render_data(self) -> RenderData:
+        raise NotImplementedError
+
+    def run(self) -> str | None:
+        raise NotImplementedError
+
+
+class MainPage(BasePage):
+    def __init__(self):
+        super().__init__()
+        self.menu_list = [
+            "메뉴1",
+            "메뉴2",
+            "메뉴3",
+        ]
+        self.selected = None
+        self.detail = """
+        WELCOME
+        this page is main
+        made by yubin
+        press "h" to help"""
+
+    def get_render_data(self) -> RenderData:
+        return RenderData(
+            menu_list=self.menu_list,
+            select_data=self.selected,
+            detail_data=self.detail,
+        )
+
+    def run(self, input) -> str | None:
+        return input
+
+
 if __name__ == "__main__":
-    printer = Printer()
-    render_data = RenderData(
-        menu_list=["a", "b", "c"], select_data=1, detail_data="detail"
-    )
-    printer.print(render_data)
     input()
