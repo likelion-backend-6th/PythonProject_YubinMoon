@@ -26,7 +26,7 @@ class RenderData:
 
 
 class Printer:
-    def __init__(self, size: tuple[int, int] = None):
+    def __init__(self):
         # TODO 화면 설정 같은 것들 추가
         window = os.get_terminal_size()
         self.width = window.columns
@@ -40,44 +40,53 @@ class Printer:
         print_data = self.render()
         if self.pre_screen != print_data:
             self.pre_screen = print_data
-            os.system(self.clear_code)
+            # os.system(self.clear_code)
+            for _ in range(self.height):
+                print("\033[F", end="")
             print(print_data, end="")
 
     def render(self) -> str:
-        text_list = self.make_str_list(self.width - self.split_loc - 3)
+        text_list = self.data.detail_data.split("\n")
         print_data = ""
-        for line_num in range(self.height):
+        print_data += self.make_top()
+        for line_num in range(self.height - 2):
             print_data += self.make_line(text_list, line_num)
+        print_data += self.make_bottom()
         return print_data.rstrip()
+
+    def make_top(self) -> str:
+        top = ["─"] * (self.width)
+        top[0] = "┌"
+        top[-1] = "┐"
+        top[self.split_loc] = "┬"
+        return "".join(top) + "\n"
+
+    def make_bottom(self) -> str:
+        bottom = ["─"] * (self.width)
+        bottom[0] = "└"
+        bottom[-1] = "┘"
+        bottom[self.split_loc] = "┴"
+        return "".join(bottom) + "\n"
 
     def get_split_num(self, data: RenderData) -> int:
         return max([len(x) for x in data.menu_list]) + 4
-
-    def make_str_list(self, width: int) -> list[str]:
-        text_data_list = self.data.detail_data.split("\n")
-        text_list = []
-        for text_data in text_data_list:
-            while text_data:
-                text_list.append(text_data[:width])
-                text_data = text_data[width:]
-        return text_list
 
     def make_line(self, text_list: list[str], line_num: int) -> str:
         result = ""
         text = ""
         if line_num < len(self.data.menu_list):
             text = self.data.menu_list[line_num]
-        text_len = self.real_len(text)
         if self.data.select_data is not None and line_num == self.data.select_data:
             result += f"> {text}"
         else:
             result += f"  {text}"
-        result += " " * (self.split_loc - self.real_len(result) - 4)
-        result += "||"
+        result += " " * (self.split_loc - self.real_len(result) - 1)
+        result += "│"
+        content = " "
         if line_num < len(text_list):
-            result += text_list[line_num]
-        result += "\n"
-        return result
+            content += text_list[line_num]
+        content += " " * (self.width - self.split_loc - self.real_len(content) - 2)
+        return "│" + result + content + "│\n"
 
     def real_len(self, text: str) -> int:
         result = 0
@@ -106,11 +115,10 @@ class MainPage(BasePage):
             "메뉴3",
         ]
         self.selected = None
-        self.detail = """
-        WELCOME
-        this page is main
-        made by yubin
-        press "h" to help"""
+        self.detail = """WELCOME
+this page is main
+made by yubin
+press "h" to help"""
 
     def get_render_data(self) -> RenderData:
         return RenderData(
