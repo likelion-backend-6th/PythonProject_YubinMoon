@@ -143,6 +143,9 @@ class Controller:
             self.printer.print(self.page.get_render_data())
             key = self.get_key_input()
             result = self.page.run(key)
+            if result:
+                self.page_stack.append(result)
+                self.page = self.get_page(result)
 
     def get_page(self, page_name: str):
         if page_name == "main":
@@ -150,10 +153,18 @@ class Controller:
         raise ValueError(f"page_name: {page_name} is not exist")
 
     def get_key_input(self) -> str:
-        while True:
-            key = keyboard.read_event()
-            if key.event_type == "down":
-                return key.name
+        try:
+            while True:
+                key = keyboard.read_event()
+                if key.event_type == "down":
+                    return key.name
+        except KeyboardInterrupt:
+            self.exit()
+
+    def exit(self):
+        print()
+        print("종료합니다.")
+        exit(0)
 
 
 if __name__ == "__main__":
