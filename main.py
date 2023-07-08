@@ -105,7 +105,7 @@ class MainPage(BasePage):
             "메뉴2",
             "메뉴3",
         ]
-        self.selected = None
+        self.selected = 0
         self.detail = """
         WELCOME
         this page is main
@@ -119,8 +119,17 @@ class MainPage(BasePage):
             detail_data=self.detail,
         )
 
-    def run(self, input) -> str | None:
-        return input
+    def run(self, key: str) -> str | None:
+        if key == "k":
+            if 0 < self.selected:
+                self.selected -= 1
+        elif key == "j":
+            if self.selected < len(self.menu_list) - 1:
+                self.selected += 1
+        elif key == "h":
+            return "help"
+        elif key == "enter":
+            return self.menu_list[self.selected]
 
 
 class Controller:
