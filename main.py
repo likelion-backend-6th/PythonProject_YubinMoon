@@ -113,13 +113,19 @@ class Controller:
     def run(self):
         while True:
             self.printer.print(self.page.get_render_data())
-            key = keyboard.read_key()
+            key = self.get_key_input()
             result = self.page.run(key)
 
     def get_page(self, page_name: str):
         if page_name == "main":
             return MainPage()
         raise ValueError(f"page_name: {page_name} is not exist")
+
+    def get_key_input(self) -> str:
+        while True:
+            key = keyboard.read_event()
+            if key.event_type == "down":
+                return key.name
 
 
 if __name__ == "__main__":
