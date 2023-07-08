@@ -31,40 +31,59 @@ class Printer:
         window = os.get_terminal_size()
         self.width = window.columns
         self.height = window.lines
+        self.split_loc = 20
+        self.clear_code = "cls" if os.name == "nt" else "clear"
+        self.pre_screen = ""
 
     def print(self, data: RenderData) -> None:
-        print_data = self.render(data)
-        os.system("cls")
-        print(print_data, end="")
+        self.data = data
+        print_data = self.render()
+        if self.pre_screen != print_data:
+            self.pre_screen = print_data
+            os.system(self.clear_code)
+            print(print_data, end="")
 
-    def render(self, data: RenderData) -> str:
-        split_num = self.get_split_num(data)
-        text_list = self.make_str_list(data, self.width - split_num - 3)
+    def render(self) -> str:
+        text_list = self.make_str_list(self.width - self.split_loc - 3)
         print_data = ""
-        for i in range(self.height):
-            text = ""
-            if i < len(data.menu_list):
-                text = data.menu_list[i]
-            if data.select_data is not None and i == data.select_data:
-                print_data += f"> {text:<{split_num}}||"
-            else:
-                print_data += f"  {text:<{split_num}}||"
-            if i < len(text_list):
-                print_data += text_list[i]
-            print_data += "\n"
+        for line_num in range(self.height):
+            print_data += self.make_line(text_list, line_num)
         return print_data.rstrip()
 
     def get_split_num(self, data: RenderData) -> int:
         return max([len(x) for x in data.menu_list]) + 4
 
-    def make_str_list(self, data: RenderData, width: int) -> list[str]:
-        text_data_list = data.detail_data.split("\n")
+    def make_str_list(self, width: int) -> list[str]:
+        text_data_list = self.data.detail_data.split("\n")
         text_list = []
         for text_data in text_data_list:
             while text_data:
                 text_list.append(text_data[:width])
                 text_data = text_data[width:]
         return text_list
+
+    def make_line(self, text_list: list[str], line_num: int) -> str:
+        result = ""
+        text = ""
+        if line_num < len(self.data.menu_list):
+            text = self.data.menu_list[line_num]
+        text_len = self.real_len(text)
+        if self.data.select_data is not None and line_num == self.data.select_data:
+            result += f"> {text}"
+        else:
+            result += f"  {text}"
+        result += " " * (self.split_loc - self.real_len(result) - 4)
+        result += "||"
+        if line_num < len(text_list):
+            result += text_list[line_num]
+        result += "\n"
+        return result
+
+    def real_len(self, text: str) -> int:
+        result = 0
+        for c in text:
+            result += 1 if len(c.encode("utf-8")) == 1 else 2
+        return result
 
 
 class BasePage:
