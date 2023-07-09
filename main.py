@@ -110,11 +110,11 @@ class MainPage(BasePage):
     def __init__(self):
         super().__init__()
         self.menu_list = [
-            "도서 추가",
-            "도서 조회",
-            "대출 조회",
+            ["도서 추가", "new_books"],
+            ["도서 조회", "test"],
+            ["대출 조회", "test"],
         ]
-        self.selected = None
+        self.selected = -1
         self.detail = """WELCOME
 this page is main
 made by yubin
@@ -122,7 +122,7 @@ press "h" to help"""
 
     def get_render_data(self) -> RenderData:
         return RenderData(
-            menu_list=self.menu_list,
+            menu_list=[name for name, _ in self.menu_list],
             select_data=self.selected,
             detail_data=self.detail,
         )
@@ -149,7 +149,49 @@ press "h" to help"""
             return "exit"
         elif key == "enter":
             if self.selected is not None and 0 <= self.selected < len(self.menu_list):
-                return self.menu_list[self.selected]
+                return self.menu_list[self.selected][1]
+        elif key == "esc":
+            self.selected = -1
+
+
+class NewBooksPage(BasePage):
+    def __init__(self):
+        super().__init__()
+        self.menu_list = [
+            ["직접 입력", "new_book_with_user_input"],
+            ["파일 입력", "new_book_with_file_input"],
+        ]
+        self.selected = -1
+        self.detail = "asdf"
+
+    def get_render_data(self) -> RenderData:
+        return RenderData(
+            menu_list=[name for name, _ in self.menu_list],
+            select_data=self.selected,
+            detail_data=self.detail,
+        )
+
+    def run(self, key: str) -> str | None:
+        key = key.lower()
+        if key == "k":
+            if self.selected is None:
+                self.selected = 0
+            elif 0 < self.selected:
+                self.selected -= 1
+            else:
+                self.selected = len(self.menu_list) - 1
+        elif key == "j":
+            if self.selected is None:
+                self.selected = 0
+            elif self.selected < len(self.menu_list) - 1:
+                self.selected += 1
+            else:
+                self.selected = 0
+        elif key == "q":
+            return "exit"
+        elif key == "enter":
+            if self.selected is not None and 0 <= self.selected < len(self.menu_list):
+                return self.menu_list[self.selected][1]
         elif key == "esc":
             self.selected = -1
 
@@ -177,8 +219,11 @@ class Controller:
     def get_page(self, page_name: str):
         if page_name == "main":
             return MainPage()
-        if page_name == "exit":
+        elif page_name == "new_books":
+            return NewBooksPage()
+        elif page_name == "exit":
             self.exit()
+
         raise ValueError(f"page_name: {page_name} is not exist")
 
     def get_key_input(self) -> str:
