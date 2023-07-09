@@ -176,7 +176,7 @@ class NewBooksPage(BaseMenuPage):
             ["파일 입력", "new_book_with_file_input"],
         ]
         self.selected = -1
-        self.detail = "asdf"
+        self.detail = """도서 추가"""
 
 
 class Controller:
@@ -228,7 +228,7 @@ class Controller:
             raise ValueError(f"page: {event} is not exist")
 
     def exit(self) -> None:
-        print()
+        os.system("cls" if os.name == "nt" else "clear")
         print("종료합니다.")
         exit(0)
 
