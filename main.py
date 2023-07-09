@@ -110,9 +110,9 @@ class MainPage(BasePage):
     def __init__(self):
         super().__init__()
         self.menu_list = [
-            "메뉴1",
-            "메뉴2",
-            "메뉴3",
+            "도서 추가",
+            "도서 조회",
+            "대출 조회",
         ]
         self.selected = None
         self.detail = """WELCOME
@@ -128,6 +128,7 @@ press "h" to help"""
         )
 
     def run(self, key: str) -> str | None:
+        key = key.lower()
         if key == "k":
             if self.selected is None:
                 self.selected = 0
@@ -147,7 +148,8 @@ press "h" to help"""
         elif key == "q":
             return "exit"
         elif key == "enter":
-            return self.menu_list[self.selected]
+            if self.selected is not None and 0 <= self.selected < len(self.menu_list):
+                return self.menu_list[self.selected]
         elif key == "esc":
             self.selected = -1
 
