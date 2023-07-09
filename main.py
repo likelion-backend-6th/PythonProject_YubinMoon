@@ -181,33 +181,23 @@ class NewBooksPage(BaseMenuPage):
 
 class Controller:
     def __init__(self):
-        self.page = self.get_page("main")
         self.printer = Printer()
         self.render_data = RenderData()
         self.page_stack = ["main"]
+        self.get_page("main")
 
-    def run(self):
+    def run(self) -> None:
         while True:
             self.print_display()
             key = self.get_key_input()
-            result = self.page.run(key)
-            if result:
-                self.page = self.get_page(result)
+            event = self.page.run(key)
+            if event:
+                self.handle_event(event)
 
-    def print_display(self):
+    def print_display(self) -> None:
         render_data = self.page.get_render_data()
         self.render_data.update(render_data)
         self.printer.print(self.render_data)
-
-    def get_page(self, page_name: str):
-        if page_name == "main":
-            return MainPage()
-        elif page_name == "new_books":
-            return NewBooksPage()
-        elif page_name == "exit":
-            self.exit()
-
-        raise ValueError(f"page_name: {page_name} is not exist")
 
     def get_key_input(self) -> str:
         try:
@@ -218,7 +208,26 @@ class Controller:
         except KeyboardInterrupt:
             self.exit()
 
-    def exit(self):
+    def handle_event(self, event: str) -> None:
+        if event == "back":
+            if self.page_stack[-1] != "main":
+                self.page_stack.pop()
+                self.get_page(self.page_stack[-1])
+        elif event == "exit":
+            self.exit()
+        else:
+            self.get_page(event)
+            self.page_stack.append(event)
+
+    def get_page(self, event: str) -> None:
+        if event == "main":
+            self.page = MainPage()
+        elif event == "new_books":
+            self.page = NewBooksPage()
+        else:
+            raise ValueError(f"page: {event} is not exist")
+
+    def exit(self) -> None:
         print()
         print("종료합니다.")
         exit(0)
