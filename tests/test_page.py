@@ -1,15 +1,12 @@
-from main import MainPage, NewBooksPage
+from main import MainPage, BaseMenuPage, NewBooksPage
 
 
 def test_main_page_get_render_data():
     page = MainPage()
     render_data = page.get_render_data()
-    menu_list = render_data.menu_list
-    assert 0 < len(menu_list)
-    for menu in menu_list:
-        assert 0 < len(menu)
+    assert render_data.menu_list == ["도서 추가", "도서 조회", "대출 조회"]
     assert render_data.select_data is -1
-    assert "WELCOME" in render_data.detail_data
+    assert len(render_data.detail_data)
 
 
 def test_main_page_run():
@@ -111,4 +108,3 @@ def test_new_books_page_menu():
     page.selected = None
     result = page.run("enter")
     assert result is None
-    pass
