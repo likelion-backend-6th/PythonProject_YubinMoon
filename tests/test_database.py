@@ -1,3 +1,4 @@
+from pprint import pprint
 import psycopg2
 import pytest
 from unittest.mock import patch
@@ -24,6 +25,31 @@ def test_create_db():
 def test_add_book():
     for i in range(10):
         res = database.create_book(
-            f"B00{i}", "test_book", "test_author", "test_publisher"
+            f"B00{i}", f"test_book{i}", f"test_author{i}", f"test_publisher{i}"
         )
         assert res == i + 1
+
+
+def test_read_books():
+    res = database.read_books()
+    for idx, data in enumerate(res):
+        assert data == (
+            idx + 1,
+            f"B00{idx}",
+            f"test_book{idx}",
+            f"test_author{idx}",
+            f"test_publisher{idx}",
+            True,
+        )
+
+    res = database.read_books(limit=3, offset=2, order_by="title")
+    for idx, data in enumerate(res):
+        num = idx + 2
+        assert data == (
+            num + 1,
+            f"B00{num}",
+            f"test_book{num}",
+            f"test_author{num}",
+            f"test_publisher{num}",
+            True,
+        )

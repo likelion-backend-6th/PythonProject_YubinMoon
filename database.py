@@ -62,11 +62,18 @@ def get_db_name(cur) -> str:
 def create_book(
     cur, book_id: str, title: str, author: str, publisher: str
 ) -> list[str]:
-    cur.execute(
-        "INSERT INTO books (book_id, title, author, publisher) VALUES (%s, %s, %s, %s) RETURNING pk;",
-        (book_id, title, author, publisher),
-    )
+    sql = "INSERT INTO books (book_id, title, author, publisher) VALUES (%s, %s, %s, %s) RETURNING pk;"
+    cur.execute(sql, (book_id, title, author, publisher))
     return cur.fetchone()[0]
+
+
+@connect
+def read_books(
+    cur, limit: int = 10, offset: int = 0, order_by: str = "book_id"
+) -> list[tuple[str]]:
+    sql = f"SELECT * FROM books ORDER BY {order_by} LIMIT %s OFFSET %s;"
+    cur.execute(sql, (limit, offset))
+    return cur.fetchall()
 
 
 if __name__ == "__main__":

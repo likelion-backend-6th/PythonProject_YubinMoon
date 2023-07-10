@@ -141,7 +141,7 @@
 - [ ] 테스트 케이스 생성
 - [x] create tables
 - [x] create book
-- [ ] read book
+- [x] read books
 - [ ] update book
 - [ ] create loan
 - [ ] read loan
