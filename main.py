@@ -185,17 +185,24 @@ class NewBooksPage(BaseMenuPage):
 
 
 class NewBooksWithUserInput(BasePage):
+    # TODO 방향키 입력 추가
+    # TODO data 클래스 따로 빼기
     data: list[list[str]] = []
 
     def __init__(self):
         super().__init__()
-        self.data = [["ID", ""], ["TITLE", ""], ["AUTHOR", ""], ["PUB", ""]]
+        NewBooksWithUserInput.data = [
+            ["ID", ""],
+            ["TITLE", ""],
+            ["AUTHOR", ""],
+            ["PUB", ""],
+        ]
         self.base_detail = """도서 추가"""
         self.selected_num = 0
 
     def get_render_data(self) -> RenderData:
         self.detail = self.base_detail
-        for index, (name, value) in enumerate(self.data):
+        for index, (name, value) in enumerate(NewBooksWithUserInput.data):
             self.detail += f"\n{name}: {value}" + (
                 "|" if self.selected_num == index else ""
             )
@@ -206,8 +213,8 @@ class NewBooksWithUserInput(BasePage):
             return "back"
         self.add_text(key)
         if key == "enter":
-            if self.selected_num == len(self.data) - 1:
-                return "next"
+            if self.selected_num == len(NewBooksWithUserInput.data) - 1:
+                return "new_book_with_user_input_check"
             else:
                 self.selected_num += 1
 
@@ -218,6 +225,39 @@ class NewBooksWithUserInput(BasePage):
             self.data[self.selected_num][1] += " "
         elif key == "backspace":
             self.data[self.selected_num][1] = self.data[self.selected_num][1][:-1]
+
+
+class NewBooksWithUserInputCheck(BasePage):
+    def __init__(self):
+        super().__init__()
+        self.user_selected = "Y"
+        self.base_detail = """도서 추가 확인"""
+
+    def get_render_data(self) -> RenderData:
+        self.detail = self.base_detail
+        self.detail += "\n"
+        for index, (name, value) in enumerate(NewBooksWithUserInput.data):
+            self.detail += f"\n{name}: {value}"
+        self.detail += "\n\n"
+        if self.user_selected == "Y":
+            self.detail += "|Y|  N "
+        else:
+            self.detail += " Y  |N|"
+        return super().get_render_data()
+
+    def run(self, key: str) -> str | None:
+        key = key.lower()
+        if key == "l":
+            self.user_selected = "N"
+        elif key == "h":
+            self.user_selected = "Y"
+        elif key == "esc":
+            return "back"
+        elif key == "enter":
+            if self.user_selected == "Y":
+                return "new_book_with_user_input_done"
+            else:
+                return "back"
 
 
 class Controller:
@@ -269,6 +309,8 @@ class Controller:
             return NewBooksPage()
         elif name == "new_book_with_user_input":
             return NewBooksWithUserInput()
+        elif name == "new_book_with_user_input_check":
+            return NewBooksWithUserInputCheck()
         else:
             raise ValueError(f"page: {name} is not exist")
 

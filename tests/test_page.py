@@ -1,4 +1,10 @@
-from main import MainPage, BaseMenuPage, NewBooksPage, NewBooksWithUserInput
+from main import (
+    MainPage,
+    BaseMenuPage,
+    NewBooksPage,
+    NewBooksWithUserInput,
+    NewBooksWithUserInputCheck,
+)
 
 
 def test_main_page_get_render_data():
@@ -123,19 +129,51 @@ def test_new_books_with_user_input_run():
     for c in "B001":
         page.run(c)
     assert page.selected_num == 0
-    assert page.data[0][0] == "ID"
-    assert page.data[0][1] == "B001"
+    assert NewBooksWithUserInput.data[0][0] == "ID"
+    assert NewBooksWithUserInput.data[0][1] == "B001"
 
     page.run("enter")
     for c in "myTitle":
         page.run(c)
     assert page.selected_num == 1
-    assert page.data[1][0] == "TITLE"
-    assert page.data[1][1] == "myTitle"
+    assert NewBooksWithUserInput.data[1][0] == "TITLE"
+    assert NewBooksWithUserInput.data[1][1] == "myTitle"
 
     page.run("enter")
-    for c in "myTitle":
+    for c in "lime":
         page.run(c)
-    assert page.selected_num == 1
-    assert page.data[1][0] == "TITLE"
-    assert page.data[1][1] == "myTitle"
+    assert page.selected_num == 2
+    assert NewBooksWithUserInput.data[2][0] == "AUTHOR"
+    assert NewBooksWithUserInput.data[2][1] == "lime"
+
+    page.run("enter")
+    for c in "pub":
+        page.run(c)
+    assert page.selected_num == 3
+    assert NewBooksWithUserInput.data[3][0] == "PUB"
+    assert NewBooksWithUserInput.data[3][1] == "pub"
+
+
+def test_new_books_with_user_input_check_get_render_data():
+    page = NewBooksWithUserInputCheck()
+    render_data = page.get_render_data()
+    assert render_data.menu_list is None
+    assert render_data.select_data is None
+    assert len(render_data.detail_data)
+
+
+def test_new_books_with_user_input_check_run():
+    page = NewBooksWithUserInputCheck()
+    result = page.run("esc")
+    assert result == "back"
+
+    assert page.user_selected == "Y"
+    page.run("l")
+    assert page.user_selected == "N"
+    result = page.run("enter")
+    assert result == "back"
+
+    page.run("h")
+    assert page.user_selected == "Y"
+    result = page.run("enter")
+    assert result == "new_book_with_user_input_done"

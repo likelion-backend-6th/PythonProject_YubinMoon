@@ -5,23 +5,21 @@ def test_get_page(mocker):
     mocker.patch("main.Printer", return_value="test")
     controller = Controller()
     controller.insert_page("main")
-    assert isinstance(controller.page, MainPage)
+    assert isinstance(controller.page_stack[-1], MainPage)
     controller.insert_page("new_books")
-    assert isinstance(controller.page, NewBooksPage)
+    assert isinstance(controller.page_stack[-1], NewBooksPage)
 
 
 def test_handle_event(mocker):
     mocker.patch("main.Printer", return_value="test")
     mocker.patch("main.Controller.exit", return_value=None)
-    mocker.patch("main.Controller.get_page", return_value=None)
+    mocker.patch("main.Controller.get_page_by_name", return_value="test")
     controller = Controller()
     controller.handle_event("test1")
-    controller.insert_page.assert_called_with("test1")
-    assert controller.page_stack == ["main", "test1"]
+    assert len(controller.page_stack) == 2
     controller.handle_event("back")
-    controller.insert_page.assert_called_with("main")
-    assert controller.page_stack == ["main"]
+    assert len(controller.page_stack) == 1
     controller.handle_event("back")
-    assert controller.page_stack == ["main"]
+    assert len(controller.page_stack) == 1
     controller.handle_event("exit")
     controller.exit.assert_called_once()
