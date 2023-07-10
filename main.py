@@ -274,7 +274,7 @@ class NewBooksWithUserInputCheck(BasePage):
     def __init__(self):
         super().__init__()
         self.user_selected = "Y"
-        self.base_detail = """도서 추가 확인"""
+        self.base_detail = """도서 추가 확인\nsdaasdfasdfasdfasdfasdfasdfasdfgahjsdfgjhasdgjhfgashjdfgjahsdgfjhasdgfjhasgdhjfgasdjhfgjhasdhjfgasdhjgfjhagd"""
 
     def get_render_data(self) -> RenderData:
         self.detail = self.base_detail
