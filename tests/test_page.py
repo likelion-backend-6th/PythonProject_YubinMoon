@@ -1,4 +1,4 @@
-from main import MainPage, BaseMenuPage, NewBooksPage
+from main import MainPage, BaseMenuPage, NewBooksPage, NewBooksWithUserInput
 
 
 def test_main_page_get_render_data():
@@ -108,3 +108,34 @@ def test_new_books_page_menu():
     page.selected = None
     result = page.run("enter")
     assert result is None
+
+
+def test_new_books_with_user_input_get_render_data():
+    page = NewBooksWithUserInput()
+    render_data = page.get_render_data()
+    assert render_data.menu_list is None
+    assert render_data.select_data is None
+    assert len(render_data.detail_data)
+
+
+def test_new_books_with_user_input_run():
+    page = NewBooksWithUserInput()
+    for c in "B001":
+        page.run(c)
+    assert page.selected_num == 0
+    assert page.data[0][0] == "ID"
+    assert page.data[0][1] == "B001"
+
+    page.run("enter")
+    for c in "myTitle":
+        page.run(c)
+    assert page.selected_num == 1
+    assert page.data[1][0] == "TITLE"
+    assert page.data[1][1] == "myTitle"
+
+    page.run("enter")
+    for c in "myTitle":
+        page.run(c)
+    assert page.selected_num == 1
+    assert page.data[1][0] == "TITLE"
+    assert page.data[1][1] == "myTitle"

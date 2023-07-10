@@ -97,10 +97,16 @@ class Printer:
 
 class BasePage:
     def __init__(self):
-        pass
+        self.menu_list: list[list[str]] | None = None
+        self.selected = None
+        self.detail = ""
 
     def get_render_data(self) -> RenderData:
-        raise NotImplementedError
+        return RenderData(
+            menu_list=None,
+            select_data=None,
+            detail_data=self.detail,
+        )
 
     def run(self) -> str | None:
         raise NotImplementedError
@@ -111,7 +117,6 @@ class BaseMenuPage(BasePage):
         super().__init__()
         self.menu_list: list[list[str]] = []
         self.selected = -1
-        self.detail = ""
 
     def get_render_data(self) -> RenderData:
         return RenderData(
@@ -179,6 +184,42 @@ class NewBooksPage(BaseMenuPage):
         self.detail = """도서 추가"""
 
 
+class NewBooksWithUserInput(BasePage):
+    data: list[list[str]] = []
+
+    def __init__(self):
+        super().__init__()
+        self.data = [["ID", ""], ["TITLE", ""], ["AUTHOR", ""], ["PUB", ""]]
+        self.base_detail = """도서 추가"""
+        self.selected_num = 0
+
+    def get_render_data(self) -> RenderData:
+        self.detail = self.base_detail
+        for index, (name, value) in enumerate(self.data):
+            self.detail += f"\n{name}: {value}" + (
+                "|" if self.selected_num == index else ""
+            )
+        return super().get_render_data()
+
+    def run(self, key: str) -> str | None:
+        if key == "esc":
+            return "back"
+        self.add_text(key)
+        if key == "enter":
+            if self.selected_num == len(self.data) - 1:
+                return "next"
+            else:
+                self.selected_num += 1
+
+    def add_text(self, key: str) -> None:
+        if len(key) == 1:
+            self.data[self.selected_num][1] += key
+        elif key == "space":
+            self.data[self.selected_num][1] += " "
+        elif key == "backspace":
+            self.data[self.selected_num][1] = self.data[self.selected_num][1][:-1]
+
+
 class Controller:
     def __init__(self):
         self.printer = Printer()
@@ -224,6 +265,8 @@ class Controller:
             self.page = MainPage()
         elif event == "new_books":
             self.page = NewBooksPage()
+        elif event == "new_book_with_user_input":
+            self.page = NewBooksWithUserInput()
         else:
             raise ValueError(f"page: {event} is not exist")
 
