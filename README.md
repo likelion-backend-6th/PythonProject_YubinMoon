@@ -143,7 +143,7 @@
 - [x] create book
 - [x] read books
 - [x] update book
-- [ ] create loan
+- [x] create loan
 - [ ] read loan
 - [ ] update loan
 

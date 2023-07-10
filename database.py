@@ -38,11 +38,11 @@ def create_tables(cur) -> None:
     cur.execute(
         """
         CREATE TABLE IF NOT EXISTS loans (
-            id int GENERATED ALWAYS AS IDENTITY,
+            pk int GENERATED ALWAYS AS IDENTITY,
             book_pk int NOT NULL,
             loan_date DATE NOT NULL,
             return_date DATE NULL,
-            PRIMARY KEY(id)
+            PRIMARY KEY(pk)
         );
         """
     )
@@ -86,6 +86,13 @@ def update_book(cur, pk: int, values: dict[str, str]) -> None:
     sql += "RETURNING *;"
     cur.execute(sql)
     return cur.fetchone()
+
+
+@connect
+def create_loan(cur, book_pk: int, loan_date: str) -> None:
+    sql = "INSERT INTO loans (book_pk, loan_date) VALUES (%s, %s) RETURNING pk;"
+    cur.execute(sql, (book_pk, loan_date))
+    return cur.fetchone()[0]
 
 
 if __name__ == "__main__":

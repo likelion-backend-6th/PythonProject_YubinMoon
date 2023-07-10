@@ -67,3 +67,9 @@ def test_update_book():
         "test_publisher0",
         False,
     )
+
+
+def test_add_loan():
+    for i in range(10):
+        res = database.create_loan(book_pk=i + 1, loan_date="2021-01-01")
+        assert res == i + 1
