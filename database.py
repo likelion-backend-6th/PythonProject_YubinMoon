@@ -21,16 +21,17 @@ def connect(func):
 
 
 @connect
-def create_db(cur) -> None:
+def create_tables(cur) -> None:
     cur.execute(
         """
         CREATE TABLE IF NOT EXISTS books (
-            id int GENERATED ALWAYS AS IDENTITY,
+            pk int GENERATED ALWAYS AS IDENTITY,
+            book_id VARCHAR(20) NOT NULL,
             title VARCHAR(100) NOT NULL,
             author VARCHAR(50) NOT NULL,
             publisher VARCHAR(50) NOT NULL,
             is_available BOOLEAN NOT NULL DEFAULT TRUE,
-            PRIMARY KEY(id)
+            PRIMARY KEY(pk)
         );
         """
     )
@@ -38,16 +39,17 @@ def create_db(cur) -> None:
         """
         CREATE TABLE IF NOT EXISTS loans (
             id int GENERATED ALWAYS AS IDENTITY,
-            book_id int NOT NULL,
+            book_pk int NOT NULL,
             loan_date DATE NOT NULL,
-            return_date DATE NULL
+            return_date DATE NULL,
+            PRIMARY KEY(id)
         );
         """
     )
 
 
 @connect
-def get_db(cur) -> str:
+def get_db_name(cur) -> str:
     cur.execute(
         """
         SELECT current_database();
@@ -57,14 +59,15 @@ def get_db(cur) -> str:
 
 
 @connect
-def add_book(cur, title: str, author: str, publisher: str) -> None:
+def create_book(
+    cur, book_id: str, title: str, author: str, publisher: str
+) -> list[str]:
     cur.execute(
-        """
-        INSERT INTO books (title, author, publisher) VALUES (%s, %s, %s);
-        """,
-        (title, author, publisher),
+        "INSERT INTO books (book_id, title, author, publisher) VALUES (%s, %s, %s, %s) RETURNING pk;",
+        (book_id, title, author, publisher),
     )
+    return cur.fetchone()[0]
 
 
 if __name__ == "__main__":
-    create_db()
+    create_tables()
