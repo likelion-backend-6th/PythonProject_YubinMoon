@@ -3,16 +3,29 @@ import keyboard
 import os
 
 
+def real_len(text: str) -> int:
+    result = 0
+    for c in text:
+        result += 1 if len(c.encode("utf-8")) == 1 else 2
+    return result
+
+
 class RenderData:
     def __init__(
         self,
         menu_list: list[str] | None = None,
         select_data: int | None = None,
-        detail_data: str = "",
+        detail_data: list[list[str]] | str = [],
     ):
         self.menu_list = menu_list
         self.select_data = select_data
-        self.detail_data = detail_data
+        if isinstance(detail_data, str):
+            self.detail_data = []
+            for line in detail_data.split("\n"):
+                self.detail_data.append([line])
+            detail_data = [[detail_data]]
+        else:
+            self.detail_data = detail_data
 
     def update(self, data: RenderData) -> None:
         if data.menu_list:
@@ -23,6 +36,39 @@ class RenderData:
             self.detail_data = data.detail_data
         if self.select_data == -1:
             self.select_data = None
+
+    def get_detail_line_with_width(self, num: int, width: int) -> str:
+        if num >= len(self.detail_data):
+            return " " * width
+        line = self.detail_data[num]
+        text = line[0]
+        center = False
+        ellipsis = "right"
+        if len(line) > 1:
+            for option in line[1:]:
+                if option == "center":
+                    center = True
+                elif option.startswith("ellipsis"):
+                    el_type = option.split("-")[1]
+                    if el_type == "left":
+                        ellipsis = "left"
+                    elif el_type == "right":
+                        ellipsis = "right"
+                    elif el_type == "center":
+                        ellipsis = "center"
+        if real_len(text) <= width:
+            rest = width - real_len(text)
+            if center:
+                return " " * (rest // 2) + text + " " * (rest - rest // 2)
+            else:
+                return text + " " * rest
+        else:
+            if ellipsis == "right":
+                return text[: width - 3] + "..."
+            elif ellipsis == "left":
+                return "..." + text[3 - width :]
+            elif ellipsis == "center":
+                return text[: (width - 3) // 2] + "..." + text[1 - (width - 3) // 2 :]
 
 
 class Printer:
@@ -46,11 +92,10 @@ class Printer:
             print(print_data, end="")
 
     def render(self) -> str:
-        text_list = self.data.detail_data.split("\n")
         print_data = ""
         print_data += self.make_top()
         for line_num in range(self.height - 2):
-            print_data += self.make_line(text_list, line_num)
+            print_data += self.make_line(line_num)
         print_data += self.make_bottom()
         return print_data.rstrip()
 
@@ -71,7 +116,7 @@ class Printer:
     def get_split_num(self, data: RenderData) -> int:
         return max([len(x) for x in data.menu_list]) + 4
 
-    def make_line(self, text_list: list[str], line_num: int) -> str:
+    def make_line(self, line_num: int) -> str:
         result = ""
         text = ""
         if line_num < len(self.data.menu_list):
@@ -81,12 +126,10 @@ class Printer:
         else:
             result += f"  {text}"
         result += " " * (self.split_loc - self.real_len(result) - 1)
-        result += "│"
-        content = " "
-        if line_num < len(text_list):
-            content += text_list[line_num]
-        content += " " * (self.width - self.split_loc - self.real_len(content) - 2)
-        return "│" + result + content + "│\n"
+        content = self.data.get_detail_line_with_width(
+            line_num, self.width - self.split_loc - 3
+        )
+        return "│" + result + "│ " + content + "│\n"
 
     def real_len(self, text: str) -> int:
         result = 0
@@ -266,6 +309,7 @@ class NewBooksWithUserInputDone(BasePage):
         self.detail = """도서 추가 완료\n\nPress any key to continue..."""
 
     def run(self, key: str) -> str:
+        # TODO new book 로직 추가
         return "new_books"
 
 

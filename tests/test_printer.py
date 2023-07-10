@@ -12,7 +12,7 @@ def test_print(mocker):
     mocker.patch("os.get_terminal_size", return_value=TestClass)
     printer = Printer()
     render_data = RenderData(
-        menu_list=["abc", "ccc", "bdc"], select_data=3, detail_data="testDetail"
+        menu_list=["abc", "ccc", "bdc"], select_data=3, detail_data=[["testDetail"]]
     )
     printer.data = render_data
     result = printer.render()
@@ -35,7 +35,9 @@ def test_print_no_select(mocker):
     test = TestClass()
     mocker.patch("os.get_terminal_size", return_value=TestClass)
     printer = Printer()
-    render_data = RenderData(menu_list=["abc", "ccc", "bdc"], detail_data="testDetail")
+    render_data = RenderData(
+        menu_list=["abc", "ccc", "bdc"], detail_data=[["testDetail"]]
+    )
     printer.data = render_data
     result = printer.render()
     assert "abc" in result
@@ -58,14 +60,15 @@ def test_print_no_select(mocker):
     mocker.patch("os.get_terminal_size", return_value=TestClass)
     printer = Printer()
     render_data = RenderData(
-        menu_list=["abc", "ccc", "bdc"], detail_data="testDetail\ntesttest"
+        menu_list=["abc", "ccc", "bdc"], detail_data=[["test1"], ["test2"]]
     )
     printer.data = render_data
     result = printer.render()
     assert "abc" in result
     assert "ccc" in result
     assert "bdc" in result
-    assert "testDetail" in result
+    assert "test1" in result
+    assert "test2" in result
     assert ">" not in result
 
     data_list = result.split("\n")
