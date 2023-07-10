@@ -138,14 +138,14 @@
 
 **database api**
 
-- [ ] 테스트 케이스 생성
+- [x] 테스트 케이스 생성
 - [x] create tables
 - [x] create book
 - [x] read books
 - [x] update book
 - [x] create loan
 - [x] read loans
-- [ ] update loan
+- [x] update loan
 
 ## 2. 미션 진행 & 회고
 
