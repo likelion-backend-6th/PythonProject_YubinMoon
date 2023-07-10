@@ -224,19 +224,19 @@ class Controller:
     def __init__(self):
         self.printer = Printer()
         self.render_data = RenderData()
-        self.page_stack = ["main"]
-        self.get_page("main")
+        self.page_stack: list[BasePage] = []
+        self.insert_page("main")
 
     def run(self) -> None:
         while True:
             self.print_display()
             key = self.get_key_input()
-            event = self.page.run(key)
+            event = self.page_stack[-1].run(key)
             if event:
                 self.handle_event(event)
 
     def print_display(self) -> None:
-        render_data = self.page.get_render_data()
+        render_data = self.page_stack[-1].get_render_data()
         self.render_data.update(render_data)
         self.printer.print(self.render_data)
 
@@ -251,24 +251,26 @@ class Controller:
 
     def handle_event(self, event: str) -> None:
         if event == "back":
-            if self.page_stack[-1] != "main":
+            if 1 < len(self.page_stack):
                 self.page_stack.pop()
-                self.get_page(self.page_stack[-1])
         elif event == "exit":
             self.exit()
         else:
-            self.get_page(event)
-            self.page_stack.append(event)
+            self.insert_page(event)
 
-    def get_page(self, event: str) -> None:
-        if event == "main":
-            self.page = MainPage()
-        elif event == "new_books":
-            self.page = NewBooksPage()
-        elif event == "new_book_with_user_input":
-            self.page = NewBooksWithUserInput()
+    def insert_page(self, event: str) -> None:
+        page = self.get_page_by_name(event)
+        self.page_stack.append(page)
+
+    def get_page_by_name(self, name: str) -> BasePage:
+        if name == "main":
+            return MainPage()
+        elif name == "new_books":
+            return NewBooksPage()
+        elif name == "new_book_with_user_input":
+            return NewBooksWithUserInput()
         else:
-            raise ValueError(f"page: {event} is not exist")
+            raise ValueError(f"page: {name} is not exist")
 
     def exit(self) -> None:
         os.system("cls" if os.name == "nt" else "clear")
