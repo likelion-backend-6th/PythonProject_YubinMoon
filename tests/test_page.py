@@ -4,6 +4,7 @@ from main import (
     NewBooksPage,
     NewBooksWithUserInput,
     NewBooksWithUserInputCheck,
+    NewBooksWithUserInputDone,
 )
 
 
@@ -177,3 +178,17 @@ def test_new_books_with_user_input_check_run():
     assert page.user_selected == "Y"
     result = page.run("enter")
     assert result == "new_book_with_user_input_done"
+
+
+def test_new_books_with_user_input_done_get_render_data():
+    page = NewBooksWithUserInputDone()
+    render_data = page.get_render_data()
+    assert render_data.menu_list is None
+    assert render_data.select_data is None
+    assert len(render_data.detail_data)
+
+
+def test_new_books_with_user_input_done_run():
+    page = NewBooksWithUserInputDone()
+    result = page.run("h")
+    assert result == "new_books"

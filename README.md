@@ -121,13 +121,20 @@
   - [x] 입력 로직 구현
   - [x] 출력 생성 로직 구현
 
-- New Books with User Input
+- New Books with User Input Check
 
   유저 입력이 올바른지 확인
 
   - [x] 테스트 케이스 생성
   - [x] Y/N 선택 로직 구현
   - [x] 출력 생성 로직 구현
+
+- New Books with User Input Done
+
+  유저 입력으로 책 생성
+
+  - [x] 테스트 케이스 생성
+  - [ ] 책 생성 로직 구현
 
 **database api**
 
