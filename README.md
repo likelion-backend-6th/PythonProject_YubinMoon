@@ -138,6 +138,8 @@
 
 **database api**
 
+데이터베이스 연결 부분 구현 코드가 적어 함수 단위로 작성하였다.
+
 - [x] 테스트 케이스 생성
 - [x] create tables
 - [x] create book
