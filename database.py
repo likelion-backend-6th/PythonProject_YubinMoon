@@ -76,5 +76,17 @@ def read_books(
     return cur.fetchall()
 
 
+@connect
+def update_book(cur, pk: int, values: dict[str, str]) -> None:
+    sql = "UPDATE books SET "
+    for key, value in values.items():
+        sql += f"{key} = '{value}', "
+    sql = sql[:-2]
+    sql += f"WHERE pk = {pk} "
+    sql += "RETURNING *;"
+    cur.execute(sql)
+    return cur.fetchone()
+
+
 if __name__ == "__main__":
     create_tables()

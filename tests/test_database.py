@@ -53,3 +53,17 @@ def test_read_books():
             f"test_publisher{num}",
             True,
         )
+
+
+def test_update_book():
+    res = database.update_book(
+        pk=1, values={"title": "test_book0_updated", "is_available": False}
+    )
+    assert res == (
+        1,
+        "B000",
+        "test_book0_updated",
+        "test_author0",
+        "test_publisher0",
+        False,
+    )
