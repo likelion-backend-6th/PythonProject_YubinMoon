@@ -260,12 +260,22 @@ class NewBooksWithUserInputCheck(BasePage):
                 return "back"
 
 
+class NewBooksWithUserInputDone(BasePage):
+    def __init__(self):
+        super().__init__()
+        self.detail = """도서 추가 완료\n\nPress any key to continue..."""
+
+    def run(self, key: str) -> str:
+        return "new_books"
+
+
 class Controller:
     def __init__(self):
         self.printer = Printer()
         self.render_data = RenderData()
         self.page_stack: list[BasePage] = []
-        self.insert_page("main")
+        self.page_name_stack: list[str] = []
+        self.change_page("main")
 
     def run(self) -> None:
         while True:
@@ -293,14 +303,21 @@ class Controller:
         if event == "back":
             if 1 < len(self.page_stack):
                 self.page_stack.pop()
+                self.page_name_stack.pop()
         elif event == "exit":
             self.exit()
         else:
-            self.insert_page(event)
+            self.change_page(event)
 
-    def insert_page(self, event: str) -> None:
-        page = self.get_page_by_name(event)
-        self.page_stack.append(page)
+    def change_page(self, event: str) -> None:
+        if event in self.page_name_stack:
+            index = self.page_name_stack.index(event)
+            self.page_stack = self.page_stack[: index + 1]
+            self.page_name_stack = self.page_name_stack[: index + 1]
+        else:
+            page = self.get_page_by_name(event)
+            self.page_stack.append(page)
+            self.page_name_stack.append(event)
 
     def get_page_by_name(self, name: str) -> BasePage:
         if name == "main":
@@ -311,6 +328,8 @@ class Controller:
             return NewBooksWithUserInput()
         elif name == "new_book_with_user_input_check":
             return NewBooksWithUserInputCheck()
+        elif name == "new_book_with_user_input_done":
+            return NewBooksWithUserInputDone()
         else:
             raise ValueError(f"page: {name} is not exist")
 

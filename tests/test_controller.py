@@ -4,9 +4,9 @@ from main import MainPage, Controller, NewBooksPage
 def test_get_page(mocker):
     mocker.patch("main.Printer", return_value="test")
     controller = Controller()
-    controller.insert_page("main")
+    controller.change_page("main")
     assert isinstance(controller.page_stack[-1], MainPage)
-    controller.insert_page("new_books")
+    controller.change_page("new_books")
     assert isinstance(controller.page_stack[-1], NewBooksPage)
 
 
