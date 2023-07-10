@@ -77,7 +77,7 @@ def read_books(
 
 
 @connect
-def update_book(cur, pk: int, values: dict[str, str]) -> None:
+def update_book(cur, pk: int, values: dict[str, str]) -> tuple[str]:
     sql = "UPDATE books SET "
     for key, value in values.items():
         sql += f"{key} = '{value}', "
@@ -89,10 +89,19 @@ def update_book(cur, pk: int, values: dict[str, str]) -> None:
 
 
 @connect
-def create_loan(cur, book_pk: int, loan_date: str) -> None:
+def create_loan(cur, book_pk: int, loan_date: str) -> int:
     sql = "INSERT INTO loans (book_pk, loan_date) VALUES (%s, %s) RETURNING pk;"
     cur.execute(sql, (book_pk, loan_date))
     return cur.fetchone()[0]
+
+
+@connect
+def read_loans(
+    cur, limit: int = 10, offset: int = 0, order_by: str = "loan_date"
+) -> list[tuple[str]]:
+    sql = f"SELECT * FROM loans ORDER BY {order_by} LIMIT %s OFFSET %s;"
+    cur.execute(sql, (limit, offset))
+    return cur.fetchall()
 
 
 if __name__ == "__main__":

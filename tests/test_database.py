@@ -3,6 +3,7 @@ import psycopg2
 import pytest
 from unittest.mock import patch
 import setting
+import datetime
 
 setting.DB_NAME = "test_library"
 import database
@@ -73,3 +74,21 @@ def test_add_loan():
     for i in range(10):
         res = database.create_loan(book_pk=i + 1, loan_date="2021-01-01")
         assert res == i + 1
+
+
+def test_read_loans():
+    res = database.read_loans()
+    import datetime
+
+    for idx, data in enumerate(res):
+        assert data[0] == idx + 1
+        assert data[1] == idx + 1
+        assert data[2] == datetime.date(2021, 1, 1)
+        assert data[3] is None
+
+    res = database.read_loans(limit=3, offset=2, order_by="loan_date")
+    for idx, data in enumerate(res):
+        assert data[0] == idx + 3
+        assert data[1] == idx + 3
+        assert data[2] == datetime.date(2021, 1, 1)
+        assert data[3] is None

@@ -144,7 +144,7 @@
 - [x] read books
 - [x] update book
 - [x] create loan
-- [ ] read loan
+- [x] read loans
 - [ ] update loan
 
 ## 2. 미션 진행 & 회고
