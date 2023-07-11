@@ -541,11 +541,9 @@ class BooksListPage(BasePage):
                 book_list = db.read_books(offset=offset, limit=20, order_by="book_id")
         else:
             book_list = db.read_books(offset=offset, limit=20, order_by="book_id")
-        result += (
-            "---ID---|---Title---|---Author---|---Publisher---|---Is Available---\n"
-        )
+        result += "---ID---|---Title---|---Author---|---Publisher---|---Status---\n"
         for index, book in enumerate(book_list):
-            line = f"{book[1]} | {book[2]} | {book[3]} | {book[4]}"
+            line = f"{book[1]} | {book[2]} | {book[3]} | {book[4]} | {'대출 가능' if book[5] else '대출 불가능'}"
             if index == selected_num:
                 result += f"> {line} <"
             else:
