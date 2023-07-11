@@ -521,7 +521,6 @@ class BooksListPage(BasePage):
         if self.selected_num >= self.book_count:
             self.selected_num = self.book_count - 1
         self.detail = self.base_detail
-        self.detail += f"{self.selected_num} {self.book_count}"
         self.detail += "\n"
         if self.mode == "search":
             self.detail += f"Search {self.search_type.upper()}: {self.input}|\n"
@@ -641,7 +640,7 @@ class BookDetailPage(BasePage):
             return "back"
         elif key == "enter":
             if self.user_selected == "L":
-                return "new_book_with_user_input_back"
+                return "loan_history"
             elif self.user_selected == "R":
                 return self.loan_book()
 
@@ -658,6 +657,43 @@ class BookDetailPage(BasePage):
             db.update_loan(pk=pk, values={"return_date": datetime.now()})
             db.update_book(detail_pk, values={"is_available": True})
         self.get_book_data()
+
+
+class LoanHistoryPage(BasePage):
+    def __init__(self):
+        super().__init__()
+        self.base_detail = """대출 기록"""
+        self.offset = 0
+        self.book_count = db.loan_count_by_book_pk(detail_pk)
+
+    def get_render_data(self) -> RenderData:
+        self.detail = self.base_detail
+        self.detail += "\n"
+        self.detail += self.get_loan_table()
+        return super().get_render_data()
+
+    def get_loan_table(self) -> str:
+        global detail_pk
+        result = ""
+        loan_list = db.read_loans_by_book_pk(
+            book_pk=detail_pk, offset=self.offset, limit=20
+        )
+        for loan in loan_list:
+            if loan[3]:
+                result += f"\n반납: {loan[3]}"
+            result += f"\n대출: {loan[2]}"
+        return result
+
+    def run(self, key: str) -> str | None:
+        key = key.lower()
+        if key == "k":
+            if 0 < self.offset:
+                self.offset -= 1
+        elif key == "j":
+            if self.offset < self.book_count - 5:
+                self.offset += 1
+        elif key == "esc" or key == "b" or key == "q" or key == "enter":
+            return "back"
 
 
 class Controller:
@@ -731,6 +767,8 @@ class Controller:
             return BooksListPage()
         elif name == "book_detail":
             return BookDetailPage()
+        elif name == "loan_history":
+            return LoanHistoryPage()
         else:
             raise ValueError(f"page: {name} is not exist")
 

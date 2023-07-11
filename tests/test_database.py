@@ -144,3 +144,8 @@ def test_update_loan():
 def test_count_book():
     res = database.count_books()
     assert res == 10
+
+
+def test_loan_count_by_book_pk():
+    res = database.loan_count_by_book_pk(1)
+    assert res == 1

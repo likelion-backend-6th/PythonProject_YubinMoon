@@ -140,6 +140,13 @@ def update_book(cur, pk: int, values: dict[str, str]) -> tuple[str]:
 
 
 @connect
+def loan_count_by_book_pk(cur, book_pk: int) -> int:
+    sql = f"SELECT COUNT(*) FROM loans WHERE book_pk = %s;"
+    cur.execute(sql, (book_pk,))
+    return cur.fetchone()[0]
+
+
+@connect
 def create_loan(cur, book_pk: int, loan_date: datetime.date) -> int:
     sql = "INSERT INTO loans (book_pk, loan_date) VALUES (%s, %s) RETURNING pk;"
     cur.execute(sql, (book_pk, loan_date))
@@ -159,7 +166,7 @@ def read_loans(
 def read_loans_by_book_pk(
     cur, book_pk: int, limit: int = 10, offset: int = 0, order_by: str = "loan_date"
 ) -> list[tuple[str]]:
-    sql = f"SELECT * FROM loans WHERE book_pk = %s ORDER BY {order_by} DESC LIMIT %s OFFSET %s;"
+    sql = f"SELECT * FROM loans WHERE book_pk = %s ORDER BY {order_by} DESC, pk DESC LIMIT %s OFFSET %s;"
     cur.execute(sql, (book_pk, limit, offset))
     return cur.fetchall()
 
