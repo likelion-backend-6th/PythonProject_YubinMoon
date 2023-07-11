@@ -60,7 +60,7 @@ def test_main_page_menu():
     assert result == "inquire_all_books"
     page.selected = 2
     result = page.run("enter")
-    assert result == "test"
+    assert result == "all_loan_history"
     page.selected = 3
     result = page.run("enter")
     assert result is None

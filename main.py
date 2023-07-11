@@ -222,7 +222,7 @@ class MainPage(BaseMenuPage):
         self.menu_list = [
             ["도서 추가", "new_books"],
             ["도서 조회", "inquire_all_books"],
-            ["대출 조회", "test"],
+            ["대출 조회", "all_loan_history"],
         ]
         self.selected = -1
         self.detail = """WELCOME
@@ -696,6 +696,44 @@ class LoanHistoryPage(BasePage):
             return "back"
 
 
+class AllLoanHistoryPage(BasePage):
+    def __init__(self):
+        super().__init__()
+        self.base_detail = """전체 대출 기록"""
+        self.offset = 0
+        self.book_count = db.all_history_count()
+
+    def get_render_data(self) -> RenderData:
+        self.detail = self.base_detail
+        self.detail += "\n"
+        self.detail += "---ID---|---Title---|---Author---|---Publisher---|---Loan Date---|---Return Date---"
+        self.detail += self.get_loan_table()
+        return super().get_render_data()
+
+    def get_loan_table(self) -> str:
+        result = ""
+        loan_list = db.all_loan_history(offset=self.offset, limit=20)
+        for loan in loan_list:
+            text = f"\n{loan[0]} | {loan[1]} | {loan[2]} | {loan[3]} | {loan[4]} "
+            if loan[5]:
+                text += f"| {loan[5]}"
+            else:
+                text += "| 대출 중..."
+            result += text
+        return result
+
+    def run(self, key: str) -> str | None:
+        key = key.lower()
+        if key == "k":
+            if 0 < self.offset:
+                self.offset -= 1
+        elif key == "j":
+            if self.offset < self.book_count - 5:
+                self.offset += 1
+        elif key == "esc" or key == "b" or key == "q" or key == "enter":
+            return "back"
+
+
 class Controller:
     def __init__(self):
         self.printer = Printer()
@@ -769,6 +807,8 @@ class Controller:
             return BookDetailPage()
         elif name == "loan_history":
             return LoanHistoryPage()
+        elif name == "all_loan_history":
+            return AllLoanHistoryPage()
         else:
             raise ValueError(f"page: {name} is not exist")
 
