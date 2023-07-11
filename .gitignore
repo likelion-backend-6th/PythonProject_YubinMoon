@@ -177,3 +177,4 @@ pyrightconfig.json
 
 my_test.py
 input/
+.benchmarks/
