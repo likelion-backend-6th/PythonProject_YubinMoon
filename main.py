@@ -366,7 +366,7 @@ class NewBooksWithFileInput(BasePage):
         elif key == "enter":
             if self.file_list:
                 NewBooksWithFileInput.selected_file = self.file_list[self.selected_num]
-                return "new_book_with_file_input_done"
+                return "new_book_with_file_input_check"
             else:
                 return "back"
         else:
@@ -394,21 +394,22 @@ class NewBooksWithFileInputCheck(BasePage):
         self.data = self.get_data_from_file()
 
     def get_data_from_file(self) -> list[list[str]]:
+        # TODO 다른 파일 형식 지원
         try:
             file = NewBooksWithFileInput.selected_file
             if file.endswith(".csv"):
                 return self.get_data_from_csv(file)
             elif file.endswith(".json"):
-                pass
+                raise NotImplementedError("from json not implemented")
             elif file.endswith(".xml"):
-                pass
+                raise NotImplementedError("from xml not implemented")
             else:
                 raise ValueError(f"File name not valid: {file}")
         except Exception as e:
             self.error_message = str(e)
             return []
 
-    def get_data_from_csv(file: str) -> list[tuple[str, str]]:
+    def get_data_from_csv(self, file: str) -> list[tuple[str, str]]:
         data_list: list[list[str]] = []
         with open(file, "r", encoding="utf-8") as f:
             rdr = csv.reader(f)
@@ -442,7 +443,17 @@ class NewBooksWithFileInputCheck(BasePage):
     def get_render_data(self) -> RenderData:
         self.detail = self.base_detail
         self.detail += "\n"
-
+        if self.data:
+            self.detail += f'--{["ID", "도서명", "저자", "출판사", "도서 상태"]}--'
+            for data in self.data:
+                self.detail += f"\n{data}"
+            self.detail += "\n\n"
+            if self.user_selected == "Y":
+                self.detail += "|Y|  N "
+            else:
+                self.detail += " Y  |N|"
+        else:
+            self.detail += self.error_message
         return super().get_render_data()
 
     def run(self, key: str) -> str | None:
@@ -456,17 +467,9 @@ class NewBooksWithFileInputCheck(BasePage):
         elif key == "enter":
             if self.user_selected == "Y":
                 self.create_new_book()
-                return "new_book_with_user_input_done"
+                return "new_book_with_file_input_done"
             else:
                 return "back"
-
-    def create_new_book(self) -> None:
-        db.create_book(
-            NewBooksWithUserInput.data[0][1],
-            NewBooksWithUserInput.data[1][1],
-            NewBooksWithUserInput.data[2][1],
-            NewBooksWithUserInput.data[3][1],
-        )
 
 
 class Controller:
@@ -532,6 +535,8 @@ class Controller:
             return NewBooksWithUserInputDone()
         elif name == "new_book_with_file_input":
             return NewBooksWithFileInput()
+        elif name == "new_book_with_file_input_check":
+            return NewBooksWithFileInputCheck()
         else:
             raise ValueError(f"page: {name} is not exist")
 
