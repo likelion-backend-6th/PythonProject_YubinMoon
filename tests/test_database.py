@@ -101,31 +101,44 @@ def test_update_book():
 
 def test_add_loan():
     for i in range(10):
-        res = database.create_loan(book_pk=i + 1, loan_date="2021-01-01")
+        res = database.create_loan(book_pk=i + 1, loan_date=datetime.datetime.today())
         assert res == i + 1
 
 
 def test_read_loans():
     res = database.read_loans()
-    import datetime
-
     for idx, data in enumerate(res):
         assert data[0] == idx + 1
         assert data[1] == idx + 1
-        assert data[2] == datetime.date(2021, 1, 1)
+        assert data[2] == datetime.datetime.now().date()
         assert data[3] is None
 
     res = database.read_loans(limit=3, offset=2, order_by="loan_date")
     for idx, data in enumerate(res):
         assert data[0] == idx + 3
         assert data[1] == idx + 3
-        assert data[2] == datetime.date(2021, 1, 1)
+        assert data[2] == datetime.datetime.now().date()
         assert data[3] is None
 
 
+def test_read_loans_by_book_pk():
+    res = database.read_loans_by_book_pk(1)
+    assert res == [(1, 1, datetime.datetime.now().date(), None)]
+
+
+def test_read_loan_return_null():
+    res = database.read_loan_return_null(1)
+    assert res == (1, 1, datetime.datetime.now().date(), None)
+
+    res = database.read_loan_return_null(100)
+    assert res is None
+
+
 def test_update_loan():
-    res = database.update_loan(pk=1, values={"return_date": "2021-01-02"})
-    assert res == (1, 1, datetime.date(2021, 1, 1), datetime.date(2021, 1, 2))
+    res = database.update_loan(
+        pk=1, values={"return_date": datetime.datetime.now().date()}
+    )
+    assert res == (1, 1, datetime.datetime.now().date(), datetime.datetime.now().date())
 
 
 def test_count_book():

@@ -1,5 +1,6 @@
 import psycopg2
 import setting
+import datetime
 
 
 def connect(func):
@@ -139,7 +140,7 @@ def update_book(cur, pk: int, values: dict[str, str]) -> tuple[str]:
 
 
 @connect
-def create_loan(cur, book_pk: int, loan_date: str) -> int:
+def create_loan(cur, book_pk: int, loan_date: datetime.date) -> int:
     sql = "INSERT INTO loans (book_pk, loan_date) VALUES (%s, %s) RETURNING pk;"
     cur.execute(sql, (book_pk, loan_date))
     return cur.fetchone()[0]
@@ -152,6 +153,22 @@ def read_loans(
     sql = f"SELECT * FROM loans ORDER BY {order_by} LIMIT %s OFFSET %s;"
     cur.execute(sql, (limit, offset))
     return cur.fetchall()
+
+
+@connect
+def read_loans_by_book_pk(
+    cur, book_pk: int, limit: int = 10, offset: int = 0, order_by: str = "loan_date"
+) -> list[tuple[str]]:
+    sql = f"SELECT * FROM loans WHERE book_pk = %s ORDER BY {order_by} DESC LIMIT %s OFFSET %s;"
+    cur.execute(sql, (book_pk, limit, offset))
+    return cur.fetchall()
+
+
+@connect
+def read_loan_return_null(cur, book_pk: int) -> list[tuple[str]]:
+    sql = f"SELECT * FROM loans WHERE book_pk = %s AND return_date IS NULL;"
+    cur.execute(sql, (book_pk,))
+    return cur.fetchone()
 
 
 @connect
