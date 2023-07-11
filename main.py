@@ -218,7 +218,7 @@ class MainPage(BaseMenuPage):
         super().__init__()
         self.menu_list = [
             ["도서 추가", "new_books"],
-            ["도서 조회", "inquire_books"],
+            ["도서 조회", "inquire_all_books"],
             ["대출 조회", "test"],
         ]
         self.selected = -1
@@ -504,17 +504,6 @@ class NewBooksWithFileInputDone(BasePage):
         return "new_books"
 
 
-class InquireBooksPage(BaseMenuPage):
-    def __init__(self):
-        super().__init__()
-        self.menu_list = [
-            ["전체 보기", "inquire_all_books"],
-            ["검색 하기", "search_books"],
-        ]
-        self.selected = -1
-        self.detail = """도서 조회"""
-
-
 class BooksListPage(BasePage):
     def __init__(self):
         super().__init__()
@@ -522,10 +511,17 @@ class BooksListPage(BasePage):
         self.book_count = db.count_books()
         self.selected_num = 0
         self.mode = "normal"
+        self.search_type = "id"
+        self.input = ""
 
     def get_render_data(self) -> RenderData:
+        if self.selected_num >= self.book_count:
+            self.selected_num = self.book_count - 1
         self.detail = self.base_detail
+        self.detail += f"{self.selected_num} {self.book_count}"
         self.detail += "\n"
+        if self.mode == "search":
+            self.detail += f"Search {self.search_type.upper()}: {self.input}|\n"
         self.detail += self.get_books_table()
         return super().get_render_data()
 
@@ -534,7 +530,17 @@ class BooksListPage(BasePage):
         offset = min(self.book_count - 5, self.selected_num - 5)
         offset = max(0, offset)
         selected_num = self.selected_num - offset
-        book_list = db.read_books(offset=offset, limit=20, order_by="book_id")
+        if self.input:
+            if self.search_type == "id":
+                book_list = db.read_books_by_Book_id(
+                    self.input, offset=offset, limit=20
+                )
+            elif self.search_type == "title":
+                book_list = db.read_books_by_title(self.input, offset=offset, limit=20)
+            else:
+                book_list = db.read_books(offset=offset, limit=20, order_by="book_id")
+        else:
+            book_list = db.read_books(offset=offset, limit=20, order_by="book_id")
         result += (
             "---ID---|---Title---|---Author---|---Publisher---|---Is Available---\n"
         )
@@ -550,8 +556,8 @@ class BooksListPage(BasePage):
     def run(self, key: str) -> str | None:
         if self.mode == "normal":
             return self.normal_mode(key)
-        elif self.mode == "search_id":
-            return self.search_id_mode(key)
+        elif self.mode == "search":
+            self.search_id_mode(key)
 
     def normal_mode(self, key: str) -> str | None:
         key = key.lower()
@@ -562,16 +568,34 @@ class BooksListPage(BasePage):
             if self.selected_num < self.book_count - 1:
                 self.selected_num += 1
         elif key == "i":
-            self.mode = "search_id"
+            self.mode = "search"
+            self.search_type = "id"
         elif key == "t":
-            self.mode = "search_title"
+            self.mode = "search"
+            self.search_type = "title"
         elif key == "h":
             return "book_search_help"
-        elif key == "esc" or key == "b":
+        elif key == "esc" or key == "b" or key == "q":
             return "back"
 
     def search_id_mode(self, key: str) -> str | None:
-        pass
+        self.insert_text(key)
+        key = key.lower()
+        if key == "esc" or key == "enter":
+            self.mode = "normal"
+
+        if self.search_type == "id":
+            self.book_count = db.count_books_by_book_id(book_id=self.input)
+        elif self.search_type == "title":
+            self.book_count = db.count_books_by_title(title=self.input)
+
+    def insert_text(self, key: str) -> None:
+        if len(key) == 1:
+            self.input += key
+        elif key == "space":
+            self.input += " "
+        elif key == "backspace":
+            self.input = self.input[:-1]
 
 
 class Controller:
@@ -641,8 +665,6 @@ class Controller:
             return NewBooksWithFileInputCheck()
         elif name == "new_book_with_file_input_done":
             return NewBooksWithFileInputDone()
-        elif name == "inquire_books":
-            return InquireBooksPage()
         elif name == "inquire_all_books":
             return BooksListPage()
         else:

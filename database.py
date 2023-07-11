@@ -88,7 +88,7 @@ def read_books(
 
 
 @connect
-def count_books_by_book_id(cur, book_id: int) -> int:
+def count_books_by_book_id(cur, book_id: str) -> int:
     sql = f"SELECT COUNT(*) FROM books WHERE book_id LIKE '%{book_id}%';"
     cur.execute(sql)
     return cur.fetchone()[0]
