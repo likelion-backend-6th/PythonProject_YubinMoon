@@ -487,6 +487,15 @@ class NewBooksWithFileInputCheck(BasePage):
             )
 
 
+class NewBooksWithFileInputDone(BasePage):
+    def __init__(self):
+        super().__init__()
+        self.detail = """도서 추가 완료\n\nPress any key to continue..."""
+
+    def run(self, key: str) -> str:
+        return "new_books"
+
+
 class Controller:
     def __init__(self):
         self.printer = Printer()
@@ -552,6 +561,8 @@ class Controller:
             return NewBooksWithFileInput()
         elif name == "new_book_with_file_input_check":
             return NewBooksWithFileInputCheck()
+        elif name == "new_book_with_file_input_done":
+            return NewBooksWithFileInputDone()
         else:
             raise ValueError(f"page: {name} is not exist")
 
