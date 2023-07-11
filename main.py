@@ -1,4 +1,6 @@
 from __future__ import annotations
+import psycopg2
+import database as db
 import keyboard
 import os
 
@@ -298,9 +300,18 @@ class NewBooksWithUserInputCheck(BasePage):
             return "back"
         elif key == "enter":
             if self.user_selected == "Y":
+                self.create_new_book()
                 return "new_book_with_user_input_done"
             else:
                 return "back"
+
+    def create_new_book(self) -> None:
+        db.create_book(
+            NewBooksWithUserInput.data[0][1],
+            NewBooksWithUserInput.data[1][1],
+            NewBooksWithUserInput.data[2][1],
+            NewBooksWithUserInput.data[3][1],
+        )
 
 
 class NewBooksWithUserInputDone(BasePage):
@@ -309,7 +320,6 @@ class NewBooksWithUserInputDone(BasePage):
         self.detail = """도서 추가 완료\n\nPress any key to continue..."""
 
     def run(self, key: str) -> str:
-        # TODO new book 로직 추가
         return "new_books"
 
 
@@ -384,4 +394,5 @@ class Controller:
 
 
 if __name__ == "__main__":
+    db.create_tables()
     Controller().run()
