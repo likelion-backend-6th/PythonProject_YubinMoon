@@ -26,7 +26,7 @@ def create_tables(cur) -> None:
         """
         CREATE TABLE IF NOT EXISTS books (
             pk int GENERATED ALWAYS AS IDENTITY,
-            book_id VARCHAR(20) NOT NULL,
+            book_id VARCHAR(20) UNIQUE NOT NULL,
             title VARCHAR(100) NOT NULL,
             author VARCHAR(50) NOT NULL,
             publisher VARCHAR(50) NOT NULL,

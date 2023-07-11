@@ -507,6 +507,34 @@ class InquireBooksPage(BaseMenuPage):
         self.detail = """도서 조회"""
 
 
+class BooksListPage(BasePage):
+    def __init__(self):
+        super().__init__()
+        self.base_detail = """도서 리스트"""
+        self.book_count = db.count_books()
+        self.offset = 0
+
+    def get_render_data(self) -> RenderData:
+        self.detail = self.base_detail
+        self.detail += "\n"
+        book_list = db.read_books(offset=self.offset, limit=20, order_by="book_id")
+        for book in book_list:
+            self.detail += f"{book}\n"
+        return super().get_render_data()
+
+    def get_books(self):
+        pass
+
+    def run(self, key: str) -> str | None:
+        key = key.lower()
+        if key == "k":
+            if 0 < self.offset:
+                self.offset -= 1
+        elif key == "j":
+            if self.offset < self.book_count - 5:
+                self.offset += 1
+
+
 class Controller:
     def __init__(self):
         self.printer = Printer()
@@ -576,6 +604,8 @@ class Controller:
             return NewBooksWithFileInputDone()
         elif name == "inquire_books":
             return InquireBooksPage()
+        elif name == "inquire_all_books":
+            return BooksListPage()
         else:
             raise ValueError(f"page: {name} is not exist")
 

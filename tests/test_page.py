@@ -171,13 +171,14 @@ def test_new_books_with_user_input_check_run():
     assert result == "back"
 
     assert page.user_selected == "Y"
+    NewBooksWithUserInput.data[0][1] = "A001"
     page.run("l")
     assert page.user_selected == "N"
     result = page.run("enter")
     assert result == "back"
-
     page.run("h")
     assert page.user_selected == "Y"
+    NewBooksWithUserInput.data[0][1] = "A002"
     result = page.run("enter")
     assert result == "new_book_with_user_input_done"
 
