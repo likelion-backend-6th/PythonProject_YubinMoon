@@ -60,10 +60,15 @@ def get_db_name(cur) -> str:
 
 @connect
 def create_book(
-    cur, book_id: str, title: str, author: str, publisher: str
+    cur,
+    book_id: str,
+    title: str,
+    author: str,
+    publisher: str,
+    is_available: bool = True,
 ) -> list[str]:
-    sql = "INSERT INTO books (book_id, title, author, publisher) VALUES (%s, %s, %s, %s) RETURNING pk;"
-    cur.execute(sql, (book_id, title, author, publisher))
+    sql = "INSERT INTO books (book_id, title, author, publisher, is_available) VALUES (%s, %s, %s, %s, %s) RETURNING pk;"
+    cur.execute(sql, (book_id, title, author, publisher, is_available))
     return cur.fetchone()[0]
 
 
