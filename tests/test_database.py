@@ -56,6 +56,30 @@ def test_read_books():
         )
 
 
+def test_read_books_by_book_id():
+    res = database.count_books_by_book_id("B001")
+    assert res == 1
+    res = database.count_books_by_book_id("00")
+    assert res == 10
+
+    res = database.read_books_by_Book_id("B001")
+    assert res == [(2, "B001", "test_book1", "test_author1", "test_publisher1", True)]
+    res = database.read_books_by_Book_id("00")
+    assert len(res) == 10
+
+
+def test_read_books_by_book_title():
+    res = database.count_books_by_title("book1")
+    assert res == 1
+    res = database.count_books_by_title("book")
+    assert res == 10
+
+    res = database.read_books_by_Book_id("B001")
+    assert res == [(2, "B001", "test_book1", "test_author1", "test_publisher1", True)]
+    res = database.read_books_by_Book_id("00")
+    assert len(res) == 10
+
+
 def test_update_book():
     res = database.update_book(
         pk=1, values={"title": "test_book0_updated", "is_available": False}

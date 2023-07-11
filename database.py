@@ -88,6 +88,38 @@ def read_books(
 
 
 @connect
+def count_books_by_book_id(cur, book_id: int) -> int:
+    sql = f"SELECT COUNT(*) FROM books WHERE book_id LIKE '%{book_id}%';"
+    cur.execute(sql)
+    return cur.fetchone()[0]
+
+
+@connect
+def read_books_by_Book_id(
+    cur, book_id: str, limit: int = 10, offset: int = 0, order_by: str = "book_id"
+) -> list[tuple[str]]:
+    sql = f"SELECT * FROM books WHERE book_id LIKE '%%{book_id}%%' ORDER BY {order_by} LIMIT %s OFFSET %s;"
+    cur.execute(sql, (limit, offset))
+    return cur.fetchall()
+
+
+@connect
+def count_books_by_title(cur, title: int) -> int:
+    sql = f"SELECT COUNT(*) FROM books WHERE title LIKE '%{title}%';"
+    cur.execute(sql)
+    return cur.fetchone()[0]
+
+
+@connect
+def read_books_by_title(
+    cur, title: str, limit: int = 10, offset: int = 0, order_by: str = "book_id"
+) -> list[tuple[str]]:
+    sql = f"SELECT * FROM books WHERE title LIKE '%%{title}%%' ORDER BY {order_by} LIMIT %s OFFSET %s;"
+    cur.execute(sql, (limit, offset))
+    return cur.fetchall()
+
+
+@connect
 def update_book(cur, pk: int, values: dict[str, str]) -> tuple[str]:
     sql = "UPDATE books SET "
     for key, value in values.items():
