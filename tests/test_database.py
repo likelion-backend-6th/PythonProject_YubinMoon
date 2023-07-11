@@ -97,3 +97,8 @@ def test_read_loans():
 def test_update_loan():
     res = database.update_loan(pk=1, values={"return_date": "2021-01-02"})
     assert res == (1, 1, datetime.date(2021, 1, 1), datetime.date(2021, 1, 2))
+
+
+def test_count_book():
+    res = database.count_books()
+    assert res == 10

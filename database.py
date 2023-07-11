@@ -73,6 +73,12 @@ def create_book(
 
 
 @connect
+def count_books(cur) -> int:
+    cur.execute("SELECT COUNT(*) FROM books;")
+    return cur.fetchone()[0]
+
+
+@connect
 def read_books(
     cur, limit: int = 10, offset: int = 0, order_by: str = "book_id"
 ) -> list[tuple[str]]:
