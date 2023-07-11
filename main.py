@@ -166,8 +166,37 @@ class BasePage:
             detail_data=self.detail,
         )
 
-    def run(self) -> str | None:
-        raise NotImplementedError
+    def run(self, key: str) -> str | None:
+        return "back"
+
+
+class HelpPage(BasePage):
+    def __init__(self):
+        super().__init__()
+        self.detail = ""
+        self.detail += "도움말"
+        self.detail += "\n\n"
+        self.detail += pre_format("k", 8)
+        self.detail += ": UP\n"
+        self.detail += pre_format("j", 8)
+        self.detail += ": DOWN\n"
+        self.detail += pre_format("h", 8)
+        self.detail += ": LEFT | 도움말\n"
+        self.detail += pre_format("l", 8)
+        self.detail += ": RIGHT\n"
+        self.detail += pre_format("q", 8)
+        self.detail += ": 종료 | 뒤로가기\n"
+        self.detail += pre_format("b", 8)
+        self.detail += ": 뒤로가기\n"
+        self.detail += pre_format("i", 8)
+        self.detail += ": id 검색\n"
+        self.detail += pre_format("t", 8)
+        self.detail += ": title 검색\n"
+        self.detail += pre_format("esc", 8)
+        self.detail += ": 뒤로가기\n"
+        self.detail += pre_format("enter", 8)
+        self.detail += ": 선택\n"
+        self.detail += "\nPress any key to continue..."
 
 
 class BaseMenuPage(BasePage):
@@ -225,10 +254,11 @@ class MainPage(BaseMenuPage):
             ["대출 조회", "all_loan_history"],
         ]
         self.selected = -1
-        self.detail = """WELCOME
-this page is main
-made by yubin
-press "h" to help"""
+        self.detail = "WELCOME"
+        self.detail += "\n"
+        self.detail += "\nthis page is main"
+        self.detail += "\nmade by yubin"
+        self.detail += "\npress `h` to help"
 
 
 class NewBooksPage(BaseMenuPage):
@@ -239,7 +269,16 @@ class NewBooksPage(BaseMenuPage):
             ["파일 입력", "new_book_with_file_input"],
         ]
         self.selected = -1
-        self.detail = """도서 추가"""
+        self.detail = "도서 추가"
+        self.detail += "\n\n"
+        self.detail += "이곳에서 새로운 도서를 추가하세요"
+        self.detail += "\n\n"
+        self.detail += "직접 입력할 수도 있고"
+        self.detail += "\n파일로도 입력할 수 있습니다."
+        self.detail += "\n\n"
+        self.detail += "파일로 입력하는 경우"
+        self.detail += f"\n'{setting.INPUT_FOLDER}` 폴더에"
+        self.detail += "\n파일을 넣어주세요"
 
 
 class NewBooksWithUserInput(BasePage):
@@ -255,7 +294,7 @@ class NewBooksWithUserInput(BasePage):
             ["AUTHOR", ""],
             ["PUB", ""],
         ]
-        self.base_detail = """도서 추가"""
+        self.base_detail = "도서 정보 입력\n"
         self.selected_num = 0
 
     def get_render_data(self) -> RenderData:
@@ -289,14 +328,14 @@ class NewBooksWithUserInputCheck(BasePage):
     def __init__(self):
         super().__init__()
         self.user_selected = "Y"
-        self.base_detail = """도서 추가 확인\nsdaasdfasdfasdfasdfasdfasdfasdfgahjsdfgjhasdgjhfgashjdfgjahsdgfjhasdgfjhasgdhjfgasdjhfgjhasdhjfgasdhjgfjhagd"""
+        self.base_detail = "도서 정보 확인\n"
 
     def get_render_data(self) -> RenderData:
         self.detail = self.base_detail
-        self.detail += "\n"
-        for index, (name, value) in enumerate(NewBooksWithUserInput.data):
+        for name, value in NewBooksWithUserInput.data:
             self.detail += f"\n{name}: {value}"
         self.detail += "\n\n"
+        self.detail += "입력한 정보가 맞습니까?\n"
         if self.user_selected == "Y":
             self.detail += "|Y|  N "
         else:
@@ -319,6 +358,7 @@ class NewBooksWithUserInputCheck(BasePage):
                 return "back"
 
     def create_new_book(self) -> None:
+        # TODO 입력 에러처리 추가
         db.create_book(
             NewBooksWithUserInput.data[0][1],
             NewBooksWithUserInput.data[1][1],
@@ -330,7 +370,10 @@ class NewBooksWithUserInputCheck(BasePage):
 class NewBooksWithUserInputDone(BasePage):
     def __init__(self):
         super().__init__()
-        self.detail = """도서 추가 완료\n\nPress any key to continue..."""
+        self.detail = "도서 추가 완료"
+        self.detail += "\n\n"
+        self.detail += "새로운 도서가 추가되었습니다.\n\n"
+        self.detail += "Press any key to continue..."
 
     def run(self, key: str) -> str:
         return "new_books"
@@ -341,7 +384,7 @@ class NewBooksWithFileInput(BasePage):
 
     def __init__(self):
         super().__init__()
-        self.base_detail = """도서 추가"""
+        self.base_detail = "도서 파일 선택\n"
         self.file_list = []
         self.selected_num = 0
         self.input_folder = os.path.join(os.getcwd(), setting.INPUT_FOLDER)
@@ -360,15 +403,18 @@ class NewBooksWithFileInput(BasePage):
         self.detail = self.base_detail
         if self.file_list:
             self.detail += "\n"
+            self.detail += "입력할 파일을 선택해주세요.\n"
             for index, file in enumerate(self.file_list):
-                self.detail += f"\n{file}" + (
+                file_name = file.split(setting.INPUT_FOLDER, 1)[1]
+                self.detail += f"\n{file_name}" + (
                     " <" if self.selected_num == index else ""
                 )
         else:
-            self.detail += "\n"
-            self.detail += "\nNo file"
-            self.detail += "\nPlease add file to input folder"
+            self.detail += "\n입력 파일을 찾을 수 없습니다."
+            self.detail += "\n입력 폴더를 확인해 주세요"
             self.detail += f"\ninput folder: {self.input_folder}"
+            self.detail += "\n\nvalid file format: json, csv, xml"
+
         return super().get_render_data()
 
     def run(self, key: str) -> str | None:
@@ -401,7 +447,7 @@ class NewBooksWithFileInputCheck(BasePage):
     def __init__(self):
         super().__init__()
         self.user_selected = "Y"
-        self.base_detail = """도서 추가 확인"""
+        self.base_detail = "파일 내용 확인\n"
         self.error_message = ""
         self.data = self.get_data_from_file()
 
@@ -458,10 +504,12 @@ class NewBooksWithFileInputCheck(BasePage):
         if self.error_message:
             self.detail += self.error_message
         else:
-            self.detail += f'--{["ID", "도서명", "저자", "출판사", "도서 상태"]}--'
+            self.detail += f"|  ID  |  도서명  |  저자  |  출판사  |  도서 상태  |"
+            self.detail += "\n"
             for data in self.data:
                 self.detail += f"\n{data}"
             self.detail += "\n\n"
+            self.detail += "입력한 정보가 맞습니까?\n"
             if self.user_selected == "Y":
                 self.detail += "|Y|  N "
             else:
@@ -501,7 +549,10 @@ class NewBooksWithFileInputCheck(BasePage):
 class NewBooksWithFileInputDone(BasePage):
     def __init__(self):
         super().__init__()
-        self.detail = """도서 추가 완료\n\nPress any key to continue..."""
+        self.detail = "도서 추가 완료"
+        self.detail += "\n\n"
+        self.detail += "새로운 도서가 추가되었습니다.\n\n"
+        self.detail += "Press any key to continue..."
 
     def run(self, key: str) -> str:
         return "new_books"
@@ -510,7 +561,7 @@ class NewBooksWithFileInputDone(BasePage):
 class BooksListPage(BasePage):
     def __init__(self):
         super().__init__()
-        self.base_detail = """도서 리스트"""
+        self.base_detail = "도서 목록"
         self.book_count = db.count_books()
         self.selected_num = 0
         self.mode = "normal"
@@ -521,7 +572,7 @@ class BooksListPage(BasePage):
         if self.selected_num >= self.book_count:
             self.selected_num = self.book_count - 1
         self.detail = self.base_detail
-        self.detail += "\n"
+        self.detail += "\n\n"
         if self.mode == "search":
             self.detail += f"Search {self.search_type.upper()}: {self.input}|\n"
         self.detail += self.get_books_table()
@@ -607,7 +658,7 @@ class BookDetailPage(BasePage):
     def __init__(self):
         super().__init__()
         self.user_selected = "L"
-        self.base_detail = """도서 상세"""
+        self.base_detail = "도서 상세"
         self.get_book_data()
 
     def get_book_data(self) -> None:
@@ -625,9 +676,9 @@ class BookDetailPage(BasePage):
 
         self.type = "대출하기" if self.book[5] else "반납하기"
         if self.user_selected == "L":
-            self.detail += f"|대출 기록|  {self.type}"
+            self.detail += f">대출 기록<  {self.type}"
         elif self.user_selected == "R":
-            self.detail += f" 대출 기록  |{self.type}|"
+            self.detail += f" 대출 기록  >{self.type}<"
         return super().get_render_data()
 
     def run(self, key: str) -> str | None:
@@ -662,13 +713,13 @@ class BookDetailPage(BasePage):
 class LoanHistoryPage(BasePage):
     def __init__(self):
         super().__init__()
-        self.base_detail = """대출 기록"""
+        self.base_detail = "대출 기록"
         self.offset = 0
         self.book_count = db.loan_count_by_book_pk(detail_pk)
 
     def get_render_data(self) -> RenderData:
         self.detail = self.base_detail
-        self.detail += "\n"
+        self.detail += "\n\n"
         self.detail += self.get_loan_table()
         return super().get_render_data()
 
@@ -699,13 +750,13 @@ class LoanHistoryPage(BasePage):
 class AllLoanHistoryPage(BasePage):
     def __init__(self):
         super().__init__()
-        self.base_detail = """전체 대출 기록"""
+        self.base_detail = "전체 대출 기록"
         self.offset = 0
         self.book_count = db.all_history_count()
 
     def get_render_data(self) -> RenderData:
         self.detail = self.base_detail
-        self.detail += "\n"
+        self.detail += "\n\n"
         self.detail += "---ID---|---Title---|---Author---|---Publisher---|---Loan Date---|---Return Date---"
         self.detail += self.get_loan_table()
         return super().get_render_data()
@@ -787,6 +838,8 @@ class Controller:
     def get_page_by_name(self, name: str) -> BasePage:
         if name == "main":
             return MainPage()
+        elif name == "help":
+            return HelpPage()
         elif name == "new_books":
             return NewBooksPage()
         elif name == "new_book_with_user_input":
