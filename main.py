@@ -1,4 +1,5 @@
 from __future__ import annotations
+from datetime import datetime
 import psycopg2
 import setting
 import database as db
@@ -620,9 +621,10 @@ class BookDetailPage(BasePage):
         self.detail += f"\n제목: {self.book[2]}"
         self.detail += f"\n저자: {self.book[3]}"
         self.detail += f"\n출판사: {self.book[4]}"
-        self.detail += f"\n상태: {'대출 가능' if self.book[5] else '대출 불가능'}"
+        self.detail += f"\n상태: {'대출 가능' if self.book[5] else '대출 중'}"
         self.detail += "\n\n"
-        self.type = "대출하기"
+
+        self.type = "대출하기" if self.book[5] else "반납하기"
         if self.user_selected == "L":
             self.detail += f"|대출 기록|  {self.type}"
         elif self.user_selected == "R":
@@ -639,10 +641,23 @@ class BookDetailPage(BasePage):
             return "back"
         elif key == "enter":
             if self.user_selected == "L":
-                self.create_new_book()
-                return "new_book_with_user_input_done"
-            elif self.user_selected == "R":
                 return "new_book_with_user_input_back"
+            elif self.user_selected == "R":
+                return self.loan_book()
+
+    def loan_book(self) -> str | None:
+        if self.book[5]:
+            db.create_loan(book_pk=detail_pk, loan_date=datetime.now())
+            db.update_book(detail_pk, values={"is_available": False})
+        else:
+            loan_data = db.read_loan_return_null(detail_pk)
+            if loan_data is None:
+                pk = db.create_loan(book_pk=detail_pk, loan_date=datetime.now())
+            else:
+                pk = loan_data[0]
+            db.update_loan(pk=pk, values={"return_date": datetime.now()})
+            db.update_book(detail_pk, values={"is_available": True})
+        self.get_book_data()
 
 
 class Controller:
