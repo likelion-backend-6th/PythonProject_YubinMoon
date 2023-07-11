@@ -196,5 +196,16 @@ def execute_sql(cur, sql: str, values) -> list[tuple[str]]:
     return cur.fetchall()
 
 
+@connect
+def all_loan_history(cur, limit: int = 10, offset: int = 0):
+    sql = """SELECT b.book_id, b.title, b.author, b.publisher, l.loan_date, l.return_date 
+    FROM books b 
+    INNER JOIN loans l ON b.pk = l.book_pk 
+    ORDER BY l.loan_date DESC, l.pk DESC 
+    LIMIT %s OFFSET %s;"""
+    cur.execute(sql, (limit, offset))
+    return cur.fetchall()
+
+
 if __name__ == "__main__":
     create_tables()
