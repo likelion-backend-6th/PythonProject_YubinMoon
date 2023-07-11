@@ -1,3 +1,6 @@
+import setting
+
+setting.DB_NAME = "test_library"
 from main import (
     MainPage,
     BaseMenuPage,
@@ -7,6 +10,7 @@ from main import (
     NewBooksWithUserInputDone,
     NewBooksWithFileInput,
     InquireBooksPage,
+    BooksListPage,
 )
 
 
@@ -257,3 +261,11 @@ def test_inquire_books_page_menu():
     page.selected = None
     result = page.run("enter")
     assert result is None
+
+
+def test_books_list_page_run(mocker):
+    page = BooksListPage()
+    res = page.run("esc")
+    assert res == "back"
+    res = page.run("B")
+    assert res == "back"

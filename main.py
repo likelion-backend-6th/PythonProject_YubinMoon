@@ -3,15 +3,23 @@ import psycopg2
 import setting
 import database as db
 import keyboard
+import unicodedata
 import os
 import csv
 
 
-def real_len(text: str) -> int:
-    result = 0
-    for c in text:
-        result += 1 if len(c.encode("utf-8")) == 1 else 2
-    return result
+def get_string_width(string: str) -> int:
+    count = sum(1 + (unicodedata.east_asian_width(c) in "WF") for c in string)
+    return count
+
+
+def pre_format(string: str, width: int, align: str = "<", fill: str = " ") -> str:
+    count = width - sum(1 + (unicodedata.east_asian_width(c) in "WF") for c in string)
+    return {
+        ">": lambda s: fill * count + s,  # lambda 매개변수 : 표현식
+        "<": lambda s: s + fill * count,
+        "^": lambda s: fill * (count // 2) + s + fill * (count // 2 + count % 2),
+    }[align](string)
 
 
 class RenderData:
@@ -60,8 +68,8 @@ class RenderData:
                         ellipsis = "right"
                     elif el_type == "center":
                         ellipsis = "center"
-        if real_len(text) <= width:
-            rest = width - real_len(text)
+        if get_string_width(text) <= width:
+            rest = width - get_string_width(text)
             if center:
                 return " " * (rest // 2) + text + " " * (rest - rest // 2)
             else:
@@ -512,29 +520,58 @@ class BooksListPage(BasePage):
         super().__init__()
         self.base_detail = """도서 리스트"""
         self.book_count = db.count_books()
-        self.offset = 0
+        self.selected_num = 0
+        self.mode = "normal"
 
     def get_render_data(self) -> RenderData:
         self.detail = self.base_detail
         self.detail += "\n"
-        book_list = db.read_books(offset=self.offset, limit=20, order_by="book_id")
-        for book in book_list:
-            self.detail += f"{book}\n"
+        self.detail += self.get_books_table()
         return super().get_render_data()
 
-    def get_books(self):
-        pass
+    def get_books_table(self) -> str:
+        result = ""
+        offset = min(self.book_count - 5, self.selected_num - 5)
+        offset = max(0, offset)
+        selected_num = self.selected_num - offset
+        book_list = db.read_books(offset=offset, limit=20, order_by="book_id")
+        result += (
+            "---ID---|---Title---|---Author---|---Publisher---|---Is Available---\n"
+        )
+        for index, book in enumerate(book_list):
+            line = f"{book[1]} | {book[2]} | {book[3]} | {book[4]}"
+            if index == selected_num:
+                result += f"> {line} <"
+            else:
+                result += f"  {line}  "
+            result += "\n"
+        return result
 
     def run(self, key: str) -> str | None:
+        if self.mode == "normal":
+            return self.normal_mode(key)
+        elif self.mode == "search_id":
+            return self.search_id_mode(key)
+
+    def normal_mode(self, key: str) -> str | None:
         key = key.lower()
         if key == "k":
-            if 0 < self.offset:
-                self.offset -= 1
+            if 0 < self.selected_num:
+                self.selected_num -= 1
         elif key == "j":
-            if self.offset < self.book_count - 5:
-                self.offset += 1
+            if self.selected_num < self.book_count - 1:
+                self.selected_num += 1
+        elif key == "i":
+            self.mode = "search_id"
+        elif key == "t":
+            self.mode = "search_title"
+        elif key == "h":
+            return "book_search_help"
         elif key == "esc" or key == "b":
             return "back"
+
+    def search_id_mode(self, key: str) -> str | None:
+        pass
 
 
 class Controller:
