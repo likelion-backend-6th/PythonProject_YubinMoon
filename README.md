@@ -254,3 +254,37 @@ UI 구상이 거의 끝나서 슬슬 DB api도 만들어야 할 것 같다. 아�
 table을 좀 이쁘게 출력하고 싶은데 문제가 많다. table이 세로로 긴 건 이미 구현을 해놨지만 가로로 갈면 어떻게 구현할지 정말 막막하다. 그래서 일단 대충 출력해 놨는데 진짜 너무 불편하다. 리펙토링 때 저거부터 어떻게 해야 겠다. 계획은 있다. 'l', 'h'키로 좌우로 이동할 수 있도록 하고 테이블의 왼쪽 부분을 잘라서 구현할 계획이긴 하다. 다만 page에서 터미널의 가로 길이를 알 수 없으니 전역변수로 선언해 줘야겠지만 맘에 안든다. 그래도 일단 고민을 해봐야 겠다.
 
 결론적으로 오랜만에 코딩 과제 하려니 재미있었다. 미리 끝내놓고 다른사람들 참견하고 다니고 싶었는데 일때문에 구현이 늦어서 아쉬울 따름이다. 리펙토링 때 다른 분들 코드나 구경해야지
+
+---
+
+## 3. 실행 요령
+
+`setting.py`에서 DB 정보를 수정해 줍니다.
+
+### 3.1. Windows
+
+```bat
+python -V 
+rem 3.10.6
+
+python -m venv venv
+venv\Scripts\activate.bat
+pip install -r requirements.txt
+python main.py
+```
+
+---
+
+### 3.2 Linux
+
+```bash
+python -V
+# 3.10.6
+
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python main.py
+```
+
+---
