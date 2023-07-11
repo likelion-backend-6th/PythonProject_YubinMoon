@@ -5,6 +5,7 @@ from main import (
     NewBooksWithUserInput,
     NewBooksWithUserInputCheck,
     NewBooksWithUserInputDone,
+    NewBooksWithFileInput,
 )
 
 
@@ -192,3 +193,46 @@ def test_new_books_with_user_input_done_run():
     page = NewBooksWithUserInputDone()
     result = page.run("h")
     assert result == "new_books"
+
+
+def test_new_books_with_file_input_get_render_data():
+    page = NewBooksWithFileInput()
+    page.file_list = []
+    render_data = page.get_render_data()
+    assert render_data.menu_list is None
+    assert render_data.select_data is None
+    assert ["No file"] in render_data.detail_data
+
+    page.file_list = ["test.csv", "test.json"]
+    render_data = page.get_render_data()
+    assert render_data.menu_list is None
+    assert render_data.select_data is None
+    assert ["test.csv <"] in render_data.detail_data
+    assert ["test.json"] in render_data.detail_data
+
+
+def test_new_books_with_file_input_run():
+    page = NewBooksWithFileInput()
+    page.file_list = []
+    page.selected_num = 0
+    page.run("k")
+    assert page.selected_num == -1
+    page.run("j")
+    assert page.selected_num == 0
+    page.run("k")
+    assert page.selected_num == -1
+    page.run("J")
+    assert page.selected_num == 0
+    page.run("J")
+    assert page.selected_num == 0
+
+    page.file_list = ["test.csv", "test.json"]
+    page.selected_num = 0
+    page.run("j")
+    assert page.selected_num == 1
+    page.run("J")
+    assert page.selected_num == 0
+    page.run("k")
+    assert page.selected_num == 1
+    page.run("K")
+    assert page.selected_num == 0

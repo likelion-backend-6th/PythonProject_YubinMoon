@@ -3,3 +3,5 @@ DB_USER = "terry"
 DB_NAME = "library"
 DB_PASSWD = "asdf"
 DB_PORT = 5432
+
+INPUT_FOLDER = "input"

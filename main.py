@@ -1,8 +1,10 @@
 from __future__ import annotations
 import psycopg2
+import setting
 import database as db
 import keyboard
 import os
+import csv
 
 
 def real_len(text: str) -> int:
@@ -323,6 +325,124 @@ class NewBooksWithUserInputDone(BasePage):
         return "new_books"
 
 
+class NewBooksWithFileInput(BasePage):
+    selected_file: str | None = None
+
+    def __init__(self):
+        super().__init__()
+        self.base_detail = """도서 추가"""
+        self.file_list = []
+        self.selected_num = 0
+        self.input_folder = os.path.join(os.getcwd(), setting.INPUT_FOLDER)
+        if os.path.isdir(self.input_folder):
+            self.file_list = self.get_file_list()
+
+    def get_file_list(self) -> list[str]:
+        file_list = []
+        for root, _, files in os.walk(self.input_folder):
+            for file in files:
+                if file.endswith((".json", ".csv", ".xml")):
+                    file_list.append(os.path.join(root, file))
+        return file_list
+
+    def get_render_data(self) -> RenderData:
+        self.detail = self.base_detail
+        if self.file_list:
+            self.detail += "\n"
+            for index, file in enumerate(self.file_list):
+                self.detail += f"\n{file}" + (
+                    " <" if self.selected_num == index else ""
+                )
+        else:
+            self.detail += "\n"
+            self.detail += "\nNo file"
+            self.detail += "\nPlease add file to input folder"
+            self.detail += f"\ninput folder: {self.input_folder}"
+        return super().get_render_data()
+
+    def run(self, key: str) -> str | None:
+        if key == "esc" or key == "b":
+            return "back"
+        elif key == "enter":
+            if self.file_list:
+                NewBooksWithFileInput.selected_file = self.file_list[self.selected_num]
+                return "new_book_with_file_input_done"
+            else:
+                return "back"
+        else:
+            self.move_list(key)
+
+    def move_list(self, key: str) -> None:
+        key = key.lower()
+        if key == "k":
+            if 0 < self.selected_num:
+                self.selected_num -= 1
+            else:
+                self.selected_num = len(self.file_list) - 1
+        elif key == "j":
+            if self.selected_num < len(self.file_list) - 1:
+                self.selected_num += 1
+            else:
+                self.selected_num = 0
+
+
+class NewBooksWithFileInputCheck(BasePage):
+    def __init__(self):
+        super().__init__()
+        self.user_selected = "Y"
+        self.base_detail = """도서 추가 확인"""
+        self.data = self.get_data_from_file()
+
+    def get_data_from_file(self) -> list[list[str]]:
+        file = NewBooksWithFileInput.selected_file
+        if file.endswith(".csv"):
+            return self.get_data_from_csv(file)
+        elif file.endswith(".json"):
+            pass
+        elif file.endswith(".xml"):
+            pass
+        else:
+            return []
+
+    def get_data_from_csv(self, file: str) -> list[tuple[str, str]]:
+        pass
+
+    def get_render_data(self) -> RenderData:
+        self.detail = self.base_detail
+        self.detail += "\n"
+        for index, (name, value) in enumerate(NewBooksWithUserInput.data):
+            self.detail += f"\n{name}: {value}"
+        self.detail += "\n\n"
+        if self.user_selected == "Y":
+            self.detail += "|Y|  N "
+        else:
+            self.detail += " Y  |N|"
+        return super().get_render_data()
+
+    def run(self, key: str) -> str | None:
+        key = key.lower()
+        if key == "l":
+            self.user_selected = "N"
+        elif key == "h":
+            self.user_selected = "Y"
+        elif key == "esc":
+            return "back"
+        elif key == "enter":
+            if self.user_selected == "Y":
+                self.create_new_book()
+                return "new_book_with_user_input_done"
+            else:
+                return "back"
+
+    def create_new_book(self) -> None:
+        db.create_book(
+            NewBooksWithUserInput.data[0][1],
+            NewBooksWithUserInput.data[1][1],
+            NewBooksWithUserInput.data[2][1],
+            NewBooksWithUserInput.data[3][1],
+        )
+
+
 class Controller:
     def __init__(self):
         self.printer = Printer()
@@ -384,6 +504,8 @@ class Controller:
             return NewBooksWithUserInputCheck()
         elif name == "new_book_with_user_input_done":
             return NewBooksWithUserInputDone()
+        elif name == "new_book_with_file_input":
+            return NewBooksWithFileInput()
         else:
             raise ValueError(f"page: {name} is not exist")
 
