@@ -10,6 +10,7 @@ from main import (
     NewBooksWithUserInputDone,
     NewBooksWithFileInput,
     BooksListPage,
+    BookDetailPage,
 )
 
 
@@ -241,3 +242,13 @@ def test_new_books_with_file_input_run():
     assert page.selected_num == 1
     page.run("K")
     assert page.selected_num == 0
+
+
+def test_book_list_page_get_render_data():
+    page = BookDetailPage()
+    pass
+
+
+def test_book_detail_page_run():
+    page = BookDetailPage()
+    pass

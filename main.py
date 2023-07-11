@@ -7,6 +7,8 @@ import unicodedata
 import os
 import csv
 
+detail_pk = 0
+
 
 def get_string_width(string: str) -> int:
     count = sum(1 + (unicodedata.east_asian_width(c) in "WF") for c in string)
@@ -526,6 +528,7 @@ class BooksListPage(BasePage):
         return super().get_render_data()
 
     def get_books_table(self) -> str:
+        global detail_pk
         result = ""
         offset = min(self.book_count - 5, self.selected_num - 5)
         offset = max(0, offset)
@@ -545,6 +548,7 @@ class BooksListPage(BasePage):
         for index, book in enumerate(book_list):
             line = f"{book[1]} | {book[2]} | {book[3]} | {book[4]} | {'대출 가능' if book[5] else '대출 불가능'}"
             if index == selected_num:
+                detail_pk = book[0]
                 result += f"> {line} <"
             else:
                 result += f"  {line}  "
@@ -565,6 +569,9 @@ class BooksListPage(BasePage):
         elif key == "j":
             if self.selected_num < self.book_count - 1:
                 self.selected_num += 1
+        elif key == "enter":
+            if 0 <= self.selected_num < self.book_count:
+                return "book_detail"
         elif key == "i":
             self.mode = "search"
             self.search_type = "id"
@@ -594,6 +601,48 @@ class BooksListPage(BasePage):
             self.input += " "
         elif key == "backspace":
             self.input = self.input[:-1]
+
+
+class BookDetailPage(BasePage):
+    def __init__(self):
+        super().__init__()
+        self.user_selected = "L"
+        self.base_detail = """도서 상세"""
+        self.get_book_data()
+
+    def get_book_data(self) -> None:
+        self.book = db.read_book_by_pk(detail_pk)
+
+    def get_render_data(self) -> RenderData:
+        self.detail = self.base_detail
+        self.detail += "\n"
+        self.detail += f"\n도서 ID: {self.book[1]}"
+        self.detail += f"\n제목: {self.book[2]}"
+        self.detail += f"\n저자: {self.book[3]}"
+        self.detail += f"\n출판사: {self.book[4]}"
+        self.detail += f"\n상태: {'대출 가능' if self.book[5] else '대출 불가능'}"
+        self.detail += "\n\n"
+        self.type = "대출하기"
+        if self.user_selected == "L":
+            self.detail += f"|대출 기록|  {self.type}"
+        elif self.user_selected == "R":
+            self.detail += f" 대출 기록  |{self.type}|"
+        return super().get_render_data()
+
+    def run(self, key: str) -> str | None:
+        key = key.lower()
+        if key == "l":
+            self.user_selected = "R"
+        elif key == "h":
+            self.user_selected = "L"
+        elif key == "esc" or key == "q" or key == "b":
+            return "back"
+        elif key == "enter":
+            if self.user_selected == "L":
+                self.create_new_book()
+                return "new_book_with_user_input_done"
+            elif self.user_selected == "R":
+                return "new_book_with_user_input_back"
 
 
 class Controller:
@@ -665,6 +714,8 @@ class Controller:
             return NewBooksWithFileInputDone()
         elif name == "inquire_all_books":
             return BooksListPage()
+        elif name == "book_detail":
+            return BookDetailPage()
         else:
             raise ValueError(f"page: {name} is not exist")
 
