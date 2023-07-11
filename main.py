@@ -394,29 +394,55 @@ class NewBooksWithFileInputCheck(BasePage):
         self.data = self.get_data_from_file()
 
     def get_data_from_file(self) -> list[list[str]]:
-        file = NewBooksWithFileInput.selected_file
-        if file.endswith(".csv"):
-            return self.get_data_from_csv(file)
-        elif file.endswith(".json"):
-            pass
-        elif file.endswith(".xml"):
-            pass
-        else:
+        try:
+            file = NewBooksWithFileInput.selected_file
+            if file.endswith(".csv"):
+                return self.get_data_from_csv(file)
+            elif file.endswith(".json"):
+                pass
+            elif file.endswith(".xml"):
+                pass
+            else:
+                raise ValueError(f"File name not valid: {file}")
+        except Exception as e:
+            self.error_message = str(e)
             return []
 
-    def get_data_from_csv(self, file: str) -> list[tuple[str, str]]:
-        pass
+    def get_data_from_csv(file: str) -> list[tuple[str, str]]:
+        data_list: list[list[str]] = []
+        with open(file, "r", encoding="utf-8") as f:
+            rdr = csv.reader(f)
+            for line in rdr:
+                data_list.append(line)
+        col_names: list[str] = data_list.pop(0)
+        if col_names[0].lower() not in ["id", "도서id", "도서 id"]:
+            print(col_names[0].lower())
+            raise ValueError("ID is not in the first column")
+        if col_names[1].lower() not in ["title", "도서명", "도서 명", "제목"]:
+            raise ValueError("Title is not in the second column")
+        if col_names[2].lower() not in ["author", "저자"]:
+            raise ValueError("Author is not in the third column")
+        if col_names[3].lower() not in ["pub", "publisher", "출판사"]:
+            raise ValueError("Publisher is not in the fourth column")
+        if col_names[4].lower() not in [
+            "is_available",
+            "is available",
+            "도서상태",
+            "도서 상태",
+        ]:
+            raise ValueError("Is_available is not in the fifth column")
+        for data in data_list:
+            is_available = data[4].lower()
+            if is_available in ["true", "대출 가능", "대출가능"]:
+                data[4] = True
+            else:
+                data[4] = False
+        return data_list
 
     def get_render_data(self) -> RenderData:
         self.detail = self.base_detail
         self.detail += "\n"
-        for index, (name, value) in enumerate(NewBooksWithUserInput.data):
-            self.detail += f"\n{name}: {value}"
-        self.detail += "\n\n"
-        if self.user_selected == "Y":
-            self.detail += "|Y|  N "
-        else:
-            self.detail += " Y  |N|"
+
         return super().get_render_data()
 
     def run(self, key: str) -> str | None:
