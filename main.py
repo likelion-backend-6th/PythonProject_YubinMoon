@@ -210,7 +210,7 @@ class MainPage(BaseMenuPage):
         super().__init__()
         self.menu_list = [
             ["도서 추가", "new_books"],
-            ["도서 조회", "test"],
+            ["도서 조회", "inquire_books"],
             ["대출 조회", "test"],
         ]
         self.selected = -1
@@ -496,6 +496,17 @@ class NewBooksWithFileInputDone(BasePage):
         return "new_books"
 
 
+class InquireBooksPage(BaseMenuPage):
+    def __init__(self):
+        super().__init__()
+        self.menu_list = [
+            ["전체 보기", "inquire_all_books"],
+            ["검색 하기", "search_books"],
+        ]
+        self.selected = -1
+        self.detail = """도서 조회"""
+
+
 class Controller:
     def __init__(self):
         self.printer = Printer()
@@ -563,6 +574,8 @@ class Controller:
             return NewBooksWithFileInputCheck()
         elif name == "new_book_with_file_input_done":
             return NewBooksWithFileInputDone()
+        elif name == "inquire_books":
+            return InquireBooksPage()
         else:
             raise ValueError(f"page: {name} is not exist")
 

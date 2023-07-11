@@ -6,6 +6,7 @@ from main import (
     NewBooksWithUserInputCheck,
     NewBooksWithUserInputDone,
     NewBooksWithFileInput,
+    InquireBooksPage,
 )
 
 
@@ -52,7 +53,7 @@ def test_main_page_menu():
     assert result == "new_books"
     page.selected = 1
     result = page.run("enter")
-    assert result == "test"
+    assert result == "inquire_books"
     page.selected = 2
     result = page.run("enter")
     assert result == "test"
@@ -236,3 +237,22 @@ def test_new_books_with_file_input_run():
     assert page.selected_num == 1
     page.run("K")
     assert page.selected_num == 0
+
+
+def test_inquire_books_page_menu():
+    page = InquireBooksPage()
+    page.selected = 0
+    result = page.run("enter")
+    assert result == "inquire_all_books"
+    page.selected = 1
+    result = page.run("enter")
+    assert result == "search_books"
+    page.selected = 2
+    result = page.run("enter")
+    assert result is None
+    page.selected = -1
+    result = page.run("enter")
+    assert result is None
+    page.selected = None
+    result = page.run("enter")
+    assert result is None

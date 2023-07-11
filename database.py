@@ -121,5 +121,11 @@ def update_loan(cur, pk: int, values: dict[str, str]) -> tuple[str]:
     return cur.fetchone()
 
 
+@connect
+def execute_sql(cur, sql: str, values) -> list[tuple[str]]:
+    cur.execute(sql, values)
+    return cur.fetchall()
+
+
 if __name__ == "__main__":
     create_tables()
