@@ -120,6 +120,13 @@ def read_books_by_title(
 
 
 @connect
+def read_book_by_pk(cur, pk: int):
+    sql = "SELECT * FROM books WHERE pk = %s;"
+    cur.execute(sql, (pk,))
+    return cur.fetchone()
+
+
+@connect
 def update_book(cur, pk: int, values: dict[str, str]) -> tuple[str]:
     sql = "UPDATE books SET "
     for key, value in values.items():

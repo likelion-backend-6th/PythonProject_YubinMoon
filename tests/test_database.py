@@ -80,6 +80,11 @@ def test_read_books_by_book_title():
     assert len(res) == 10
 
 
+def test_read_book_by_pk():
+    res = database.read_book_by_pk(1)
+    assert res == (1, "B000", "test_book0", "test_author0", "test_publisher0", True)
+
+
 def test_update_book():
     res = database.update_book(
         pk=1, values={"title": "test_book0_updated", "is_available": False}
