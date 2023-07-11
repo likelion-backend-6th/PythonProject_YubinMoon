@@ -533,6 +533,8 @@ class BooksListPage(BasePage):
         elif key == "j":
             if self.offset < self.book_count - 5:
                 self.offset += 1
+        elif key == "esc" or key == "b":
+            return "back"
 
 
 class Controller:
@@ -545,11 +547,14 @@ class Controller:
 
     def run(self) -> None:
         while True:
-            self.print_display()
-            key = self.get_key_input()
-            event = self.page_stack[-1].run(key)
-            if event:
-                self.handle_event(event)
+            try:
+                self.print_display()
+                key = self.get_key_input()
+                event = self.page_stack[-1].run(key)
+                if event:
+                    self.handle_event(event)
+            except KeyboardInterrupt:
+                self.exit()
 
     def print_display(self) -> None:
         render_data = self.page_stack[-1].get_render_data()
@@ -557,13 +562,10 @@ class Controller:
         self.printer.print(self.render_data)
 
     def get_key_input(self) -> str:
-        try:
-            while True:
-                key = keyboard.read_event()
-                if key.event_type == "down":
-                    return key.name
-        except KeyboardInterrupt:
-            self.exit()
+        while True:
+            key = keyboard.read_event()
+            if key.event_type == "down":
+                return key.name
 
     def handle_event(self, event: str) -> None:
         if event == "back":
