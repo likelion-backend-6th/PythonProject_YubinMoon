@@ -154,3 +154,8 @@ def test_loan_count_by_book_pk():
 def test_all_loan_history():
     res = database.all_loan_history()
     assert len(res) == 10
+
+
+def test_all_loan_count():
+    res = database.all_history_count()
+    assert res == 10

@@ -207,5 +207,12 @@ def all_loan_history(cur, limit: int = 10, offset: int = 0):
     return cur.fetchall()
 
 
+@connect
+def all_history_count(cur) -> int:
+    sql = """SELECT COUNT(*) FROM books b INNER JOIN loans l ON b.pk = l.book_pk;"""
+    cur.execute(sql)
+    return cur.fetchone()[0]
+
+
 if __name__ == "__main__":
     create_tables()
