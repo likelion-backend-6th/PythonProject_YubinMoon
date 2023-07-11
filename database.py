@@ -66,7 +66,7 @@ def create_book(
     author: str,
     publisher: str,
     is_available: bool = True,
-) -> list[str]:
+) -> int:
     sql = "INSERT INTO books (book_id, title, author, publisher, is_available) VALUES (%s, %s, %s, %s, %s) RETURNING pk;"
     cur.execute(sql, (book_id, title, author, publisher, is_available))
     return cur.fetchone()[0]

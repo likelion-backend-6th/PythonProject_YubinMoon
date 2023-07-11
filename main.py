@@ -391,6 +391,7 @@ class NewBooksWithFileInputCheck(BasePage):
         super().__init__()
         self.user_selected = "Y"
         self.base_detail = """도서 추가 확인"""
+        self.error_message = ""
         self.data = self.get_data_from_file()
 
     def get_data_from_file(self) -> list[list[str]]:
@@ -443,7 +444,9 @@ class NewBooksWithFileInputCheck(BasePage):
     def get_render_data(self) -> RenderData:
         self.detail = self.base_detail
         self.detail += "\n"
-        if self.data:
+        if self.error_message:
+            self.detail += self.error_message
+        else:
             self.detail += f'--{["ID", "도서명", "저자", "출판사", "도서 상태"]}--'
             for data in self.data:
                 self.detail += f"\n{data}"
@@ -452,8 +455,6 @@ class NewBooksWithFileInputCheck(BasePage):
                 self.detail += "|Y|  N "
             else:
                 self.detail += " Y  |N|"
-        else:
-            self.detail += self.error_message
         return super().get_render_data()
 
     def run(self, key: str) -> str | None:
@@ -466,10 +467,24 @@ class NewBooksWithFileInputCheck(BasePage):
             return "back"
         elif key == "enter":
             if self.user_selected == "Y":
-                self.create_new_book()
+                try:
+                    self.create_new_books()
+                except psycopg2.Error as e:
+                    self.error_message = str(e)
+                    return
                 return "new_book_with_file_input_done"
             else:
                 return "back"
+
+    def create_new_books(self):
+        for data in self.data:
+            book = db.create_book(
+                book_id=data[0],
+                title=data[1],
+                author=data[2],
+                publisher=data[3],
+                is_available=data[4],
+            )
 
 
 class Controller:
