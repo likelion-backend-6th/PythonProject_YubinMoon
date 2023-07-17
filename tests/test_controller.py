@@ -1,4 +1,5 @@
-from main import MainPage, Controller, NewBooksPage
+from main import Controller
+from page import MainPage, NewBooksPage
 
 
 def test_get_page(mocker):

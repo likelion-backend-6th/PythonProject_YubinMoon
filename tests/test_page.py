@@ -1,7 +1,7 @@
 import setting
 
 setting.DB_NAME = "test_library"
-from main import (
+from page import (
     MainPage,
     BaseMenuPage,
     NewBooksPage,
@@ -207,9 +207,9 @@ def test_new_books_with_file_input_get_render_data():
     render_data = page.get_render_data()
     assert render_data.menu_list is None
     assert render_data.select_data is None
-    assert ["No file"] in render_data.detail_data
+    assert ["도서 파일 선택"] in render_data.detail_data
 
-    page.file_list = ["test.csv", "test.json"]
+    page.file_list = ["input/test.csv", "input/test.json"]
     render_data = page.get_render_data()
     assert render_data.menu_list is None
     assert render_data.select_data is None

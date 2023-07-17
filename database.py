@@ -5,18 +5,23 @@ import datetime
 
 def connect(func):
     def inner(*args, **kwargs):
-        conn = psycopg2.connect(
-            host=setting.DB_URL,
-            dbname=setting.DB_NAME,
-            user=setting.DB_USER,
-            password=setting.DB_PASSWD,
-            port=setting.DB_PORT,
-        )
-        cur = conn.cursor()
-        result = func(cur, *args, **kwargs)
-        conn.commit()
-        cur.close()
-        return result
+        try:
+            conn = psycopg2.connect(
+                host=setting.DB_URL,
+                dbname=setting.DB_NAME,
+                user=setting.DB_USER,
+                password=setting.DB_PASSWD,
+                port=setting.DB_PORT,
+            )
+            cur = conn.cursor()
+            result = func(cur, *args, **kwargs)
+            conn.commit()
+            cur.close()
+            return result
+        except psycopg2.Error as e:
+            print("DB 연결에 실패했습니다.")
+            print(e)
+            exit(1)
 
     return inner
 
